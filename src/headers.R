@@ -13,19 +13,24 @@ if(!require("phytools")){
     install.packages("phytools"); library(phytools)}
 if(!require("caper")){
     install.packages("caper"); library(caper)}
+if(!require("abind")){
+    install.packages("abind"); library(abind)}
+
 
 ####################################
 # Global settings ##################
 ####################################
-gbif.dir <- "~/bear-share/gbif/"
-if(gbif.dir!="~/bear-share/gbif/")
+gbif.dir <- "/home/will/bear-share/gbif/"
+if(gbif.dir!="/home/will/bear-share/gbif/")
     warning("GBIF data is not in default directory: ensure `download-gbif.rb` is similarly updated")
 
-cru.dir <- "~/bear-share/cru/"
-if(cru.dir!="~/bear-share/cru/")
+cru.dir <- "/home/will/bear-share/cru/"
+if(cru.dir!="/home/will/bear-share/cru/")
     warning("CRU data is not in default directory: ensure `download-cru.rb` is similarly updated")
 
 output.dir <- "clean-data/"
+
+quantiles <- c(.05, .25, .5, .75, .95)
 
 options(mc.cores=24)
 if(options("mc.cores")==24)
@@ -67,13 +72,6 @@ prog.bar <- function(x, y){
     data <- data[year > 1955 & year <= 2015,]
     return(data)
 }
-.create.raster.stack <- function(x, long=seq(-179.75,179.75,by=0.5), lat=seq(-89.75,89.75,by=0.5)){
-    output <- raster(t(x[,,1][,ncol(x):1]), xmn=min(long), xmx=max(long), ymn=min(lat), ymx=max(lat))
-    base <- raster(xmn=min(long), xmx=max(long), ymn=min(lat), ymx=max(lat))
-    for(i in seq(2, dim(x)[3]))
-        output <- stack(output, raster(t(x[,,i][,ncol(x):1]), xmn=min(long), xmx=max(long), ymn=min(lat), ymx=max(lat)))
-    return(output)
-}
 .calc.track <- function(i){
     name <- paste0("taxon_", i, "_results.RDS")
     data <- wrap.list[[i]]
@@ -108,28 +106,57 @@ prog.bar <- function(x, y){
     saveRDS(results, name)
     return(results)
 }
-
-
-.calc.metric <- function(present, past, projected, quantile=.5, n.boot=99){
+.calc.metric <- function(present, past, projected, quantile=.5, n.boot=999){
     # Calculate observed quantiles
-    m.present <- quantile(present, quantile)
-    m.past <- quantile(past, quantile)
-    m.projected <- quantile(projected, quantile)
+    m.present <- quantile(present, quantile, na.rm=TRUE)
+    m.past <- quantile(past, quantile, na.rm=TRUE)
+    m.projected <- quantile(projected, quantile, na.rm=TRUE)
     index <- (m.present-m.past) / (m.projected-m.past)
 
-    # Bootstrap present in past
-    boots <- replicate(n.boot, sample(present, length(past)), simplify=FALSE)
-    boots <- apply(sapply(boots, quantile, probs=quantile, na.rm=TRUE), 1, function(x) (x-m.past)/(m.projected-m.past))
-    r.index.past <- rank(c(index,boots))
-
-    # Bootstrap past in present
-    boots <- replicate(n.boot, sample(past, length(present)), simplify=FALSE)
-    boots <- apply(sapply(boots, quantile, probs=quantile, na.rm=TRUE), 1, function(x) (m.present-x)/(m.projected-x))
-    r.index.pres <- rank(c(index,boots))
-     
+    # Bootstrap past and present sampling
+    b.present <- replicate(n.boot, sample(present, length(past), replace=TRUE), simplify=FALSE)
+    b.present <- sapply(b.present, quantile, probs=quantile, na.rm=TRUE)
+    b.past <- replicate(n.boot, sample(past, length(present), replace=TRUE), simplify=FALSE)
+    b.past <- sapply(b.past, quantile, probs=quantile, na.rm=TRUE)
+    b.projected <- replicate(n.boot, sample(projected, length(present), replace=TRUE), simplify=FALSE)
+    b.projected <- sapply(b.projected, quantile, probs=quantile, na.rm=TRUE)
+    b.mad <- mad((b.present-b.past) / (b.projected-b.past))
+    b.index <- median((b.present-b.past) / (b.projected-b.past))
+    
     # Format and return
     return(setNames(
-        c(index, r.index.past, r.index.pres, quantile),
-        c("index","rank.pres","rank.past", quantile)
+        c(index, b.index, b.mad, quantile,m.present,m.past,m.projected),
+        c("index","bootstrap.index", "mad.index", "quantile","present","past","projected")
     ))
+}
+.assign.outcome <- function(present, past, projected){
+    if(present==past)
+        return("track")
+    if(present==projected)
+        return("static-distribution")
+
+    # Warming
+    if(projected > past){
+        if(present < projected){
+            if(present > past)
+                return("lag")
+            return("overshoot")
+        }
+        if(present > projected){
+            return("undershoot")
+        }
+    }
+    
+    # Cooling
+    if(projected < past){
+        if(present > projected){
+            if(present < past)
+                return("overshoot")
+            return("lag")
+        }
+        if(present < projected){
+            return("undershoot")
+        }
+    }
+    return("ERROR")
 }
