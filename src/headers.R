@@ -151,8 +151,8 @@ prog.bar <- function(x, y){
     if(projected < past){
         if(present > projected){
             if(present < past)
-                return("overshoot")
-            return("lag")
+                return("lag")
+            return("overshoot")
         }
         if(present < projected){
             return("undershoot")
