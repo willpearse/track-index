@@ -56,7 +56,8 @@ saveRDS(
 saveRDS(
     .clean.cru(paste0(cru.dir,"cru_ts4.03.1901.2018.vap.dat.nc"), "vap"),
     paste0(output.dir,"cru-vap.RDS")
-)saveRDS(
+)
+saveRDS(
     .clean.cru(paste0(cru.dir,"cru_ts4.03.1901.2018.wet.dat.nc"), "wet"),
     paste0(output.dir,"cru-wet.RDS")
 )

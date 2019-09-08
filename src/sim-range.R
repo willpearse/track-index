@@ -3,8 +3,14 @@ source("src/headers.R")
 temp <- readRDS("clean-data/cru-tmp.RDS")
 
 # Wrapper functions
-.make.block.dist <- function(x, y, range)
-    as.matrix(expand.grid(x+seq(-range,range), y+seq(-range,range)))
+.make.block.dist <- function(x, y, range, raster){
+    block <- as.matrix(expand.grid(x+seq(-range,range), y+seq(-range,range)))
+    if(!missing(raster)){
+        block <- block[block[,1] > 0 & block[,1] <= nrow(raster),]
+        block <- block[block[,2] > 0 & block[,2] <= ncol(raster),]
+    }
+    return(block)
+}
 .check.viable <- function(dist, raster)
     !(any(dist < 0) | any(dist[,1] > nrow(raster)) | any(dist[,2] > ncol(raster)))
 .get.niche <- function(dist, raster)
@@ -17,14 +23,13 @@ temp <- readRDS("clean-data/cru-tmp.RDS")
     return(present)
 }
 .dist.wrap <- function(x, y, range, raster, alpha, sd, optimum){
-    block <- .make.block.dist(x, y, range)
-    block <- block[block[,1] > 0 & block[,1] <= nrow(raster),]
-    block <- block[block[,2] > 0 & block[,2] <= ncol(raster),]
+    block <- .make.block.dist(x, y, range, raster)
     return(.prob.occur(block, raster, alpha, sd, optimum))
 }
 .do.calc <- function(i){
     # Make distributions
-    optimum <- .get.niche(.make.block.dist(data$x[i], data$y[i], data$range[i]), early)
+    # THIS IS THE ONE
+    optimum <- .get.niche(.make.block.dist(data$x[i], data$y[i], data$range[i], temp), early)
     early.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], early, data$alpha[i], 1, optimum)
     mid.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], mid, data$alpha[i], 1, optimum)
     late.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], late, data$alpha[i], 1, optimum)
