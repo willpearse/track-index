@@ -15,6 +15,18 @@ if(!require("caper")){
     install.packages("caper"); library(caper)}
 if(!require("abind")){
     install.packages("abind"); library(abind)}
+if(!require("ks")){
+    install.packages("ks"); library(ks)}
+if(!require("geiger")){
+    install.packages("geiger"); library(geiger)}
+if(!require("suppdata")){
+    install.packages("suppdata"); library(suppdata)}
+if(!require("pez")){
+    install.packages("pez"); library(pez)}
+if(!require("scales")){
+    install.packages("scales"); library(scales)}
+if(!require("reldist")){
+    install.packages("reldist"); library(reldist)}
 
 
 ####################################
@@ -47,7 +59,7 @@ prog.bar <- function(x, y){
                 tryCatch(if(z[1] < 1) if((length(z) %% 10)==0) cat("|") else cat("."), error=function(z) cat("."))
         }
 }    
-.load.gbif <- function(obs, specimens, min.records=2000){
+.load.gbif <- function(obs, specimens, min.records=2000, clean.binomial=FALSE){
     data <- data.table(scientificname="", decimallatitude=0.0, decimallongitude=0.0, year=0, type="")
     if(!missing(obs)){
         tmp <- fread(obs)
@@ -62,6 +74,12 @@ prog.bar <- function(x, y){
     if(missing(specimens) & missing(obs))
         stop("Must supply *some* data to load!...")
     data <- data[-1,]
+
+    if(clean.binomial){
+        spp <- unique(data$scientificname)
+        spp <- setNames(tolower(sapply(strsplit(spp, " "), function(x) paste(x[1:2], collapse="_"))), spp)
+        data$scientificname <- spp[data$scientificname]
+    }
 
     # Find most common species and subset
     spp.table <- sort(table(data$scientificname), TRUE)
@@ -160,3 +178,24 @@ prog.bar <- function(x, y){
     }
     return("ERROR")
 }
+.simplify <- function(data, index, quantile, clean, abs=FALSE){
+    data <- t(data[,quantile,index,])
+    if(!missing(clean)){
+        keep <- rep(TRUE, nrow(data))
+        for(i in seq_len(ncol(data)))
+            keep <- keep & abs(data[,i]) <= clean
+        data <- data[keep,]
+    }
+    if(abs)
+        data <- abs(data)
+    return(data)
+}
+.simplify.group <- function(index, quantile, clean, abs=FALSE)
+    return(rbind(
+        data.frame(.simplify(plants, index, quantile, clean, abs), taxon="plants"),
+        data.frame(.simplify(fungi, index, quantile, clean, abs), taxon="fungi"),
+        data.frame(.simplify(insects, index, quantile, clean, abs), taxon="insects"),
+        data.frame(.simplify(mammals, index, quantile, clean, abs), taxon="mammals"),
+        data.frame(.simplify(reptiles, index, quantile, clean, abs), taxon="reptiles"),
+        data.frame(.simplify(birds, index, quantile, clean, abs), taxon="birds")
+    ))

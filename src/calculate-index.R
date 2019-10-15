@@ -38,36 +38,36 @@ source("src/headers.R")
 
         return(output)
     }
-    
+
     output <- mcMap(.int.calc, unique(data$scientificname))
     output <- abind(output, along=4)
+    return(output)
 }
 
 
 # Load and clean GBIF data
 plants <- .load.gbif(
-    obs=paste0(gbif.dir,"plantae/0001849-180131172636756_abbreviated.txt"),
-    specimens=paste0(gbif.dir,"plantae/0001851-180131172636756_abbreviated.txt")
-)
-mammals <- .load.gbif(obs=paste0(gbif.dir,"mammalia/0000171-180412121330197_abbreviated.txt"))
-amphibians <- .load.gbif(obs=paste0(gbif.dir,"amphibia/0034734-180508205500799_abbreviated.txt"))
-fungi <- .load.gbif(obs=paste0(gbif.dir,"asco-basidio/0034724-180508205500799_abbreviated.txt"))
-birds <- .load.gbif(obs=paste0(gbif.dir,"aves/0000172-180412121330197_abbreviated.txt"))
-insects <- .load.gbif(obs=paste0(gbif.dir,"insecta/0034726-180508205500799_abbreviated.txt"))
-reptiles <- .load.gbif(obs=paste0(gbif.dir,"reptillia/0034728-180508205500799_abbreviated.txt"))
+    obs=paste0(gbif.dir,"plantae/0001849-180131172636756_abbreviated.txt")#,
+    #specimens=paste0(gbif.dir,"plantae/0001851-180131172636756_abbreviated.txt")
+, min.records=1000, clean.binomial=TRUE)
+mammals <- .load.gbif(obs=paste0(gbif.dir,"mammalia/0000171-180412121330197_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
+amphibians <- .load.gbif(obs=paste0(gbif.dir,"amphibia/0034734-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
+fungi <- .load.gbif(obs=paste0(gbif.dir,"asco-basidio/0034724-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
+birds <- .load.gbif(obs=paste0(gbif.dir,"aves/0000172-180412121330197_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
+insects <- .load.gbif(obs=paste0(gbif.dir,"insecta/0034726-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
+reptiles <- .load.gbif(obs=paste0(gbif.dir,"reptillia/0034728-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
 
 # Load climate rasters
 cru <- list(
     cld=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    ftr=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    frs=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    pet=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    pre=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    tmn=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    tmp=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    tmx=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    vap=readRDS(paste0(output.dir,"cru-cld.RDS")),
-    wet=readRDS(paste0(output.dir,"cru-cld.RDS"))
+    frs=readRDS(paste0(output.dir,"cru-frs.RDS")),
+    pet=readRDS(paste0(output.dir,"cru-pet.RDS")),
+    pre=readRDS(paste0(output.dir,"cru-pre.RDS")),
+    tmn=readRDS(paste0(output.dir,"cru-tmn.RDS")),
+    tmp=readRDS(paste0(output.dir,"cru-tmp.RDS")),
+    tmx=readRDS(paste0(output.dir,"cru-tmx.RDS")),
+    vap=readRDS(paste0(output.dir,"cru-vap.RDS")),
+    wet=readRDS(paste0(output.dir,"cru-wet.RDS"))
 )    
     
 # Do work and save results
