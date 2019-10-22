@@ -1,0 +1,416 @@
+\documentclass[12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\renewcommand\thesection{\arabic{section}}
+\usepackage[parfill]{parskip}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage[left=0.75in,right=0.75in,top=0.75in,bottom=0.75in]{geometry}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{nth}
+\usepackage{bm}
+\usepackage{siunitx}
+\usepackage[labelfont=bf]{caption}
+\usepackage[doublespacing]{setspace}
+\usepackage{filecontents}
+\usepackage{lineno} \linenumbers
+\usepackage{amsmath}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Bibliography%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[style=numeric-comp,sorting=none,uniquelist=minyear,uniquename=false,maxcitenames=2,maxbibnames=5,doi=false,url=false,isbn=false,defernumbers=true,giveninits=true]{biblatex}
+%Italicise et al.
+\renewbibmacro*{name:andothers}{
+% Based on name:andothers from biblatex.def
+\ifboolexpr{ test{\ifnumequal{\value{listcount}}{\value{liststop}}} and test \ifmorenames } {\ifnumgreater{\value{liststop}}{1} {\finalandcomma}
+{}%
+\andothersdelim\bibstring[\emph]{andothers}} {}}
+%Make 'and' an ampersand
+\renewcommand*{\finalnamedelim}{%
+\ifnumgreater{\value{liststop}}{2}{\finalandcomma}{}%
+\addspace\&\space}
+%Remove 'in:'
+\renewbibmacro{in:}{}
+%Remove pp. on pages numbers
+\DeclareFieldFormat[article]{pages}{#1}%
+%Remove unwanted entries
+\AtEveryBibitem{%
+  \clearfield{day}%
+  \clearfield{month}%
+  \clearfield{endday}%
+  \clearfield{endmonth}%
+  \clearfield{url}%
+  \clearfield{URL}%
+  \clearfield{eprint}%
+}
+%Remove spaces between initials
+%Remove double quotes around titles
+\DeclareFieldFormat*{citetitle}{#1}
+\DeclareFieldFormat*{title}{#1}
+\addbibresource{/home/will/Papers/Library.bib}
+\begin{document}
+\section*{Title page}
+\textbf{Article title}: Placing species' climate envelope within its
+historic context reveals remarkable idiosyncrasy of distributional
+change
+
+\textbf{Authors:} William D.\ Pearse$^{1,*}$ \& T.\ Jonathan
+Davies$^{2,*}$
+
+$^1$ Department of Biology \& Ecology Center, Utah State University,
+5305 Old Main Hill, Logan UT, 84322
+
+$^2$ Department of Biological Sciences, Universit\'{e} du Qu\'{e}bec
+\`{a} Montr\'{e}al, Montr\'{e}al, Qu\'{e}bec, Canada
+
+$^*$ To whom correspondence should be addressed:
+\url{will.pearse@usu.edu} and \url{j.davies@ubc.ca}
+
+\textbf{Word-count}: XXX (excluding figure legends)
+
+\clearpage
+\textbf{Abstract. Here we
+  show ... Abstract.}
+
+% Species have climatic tolerances that are conserved
+% * Caused by deep-time evolutionary processes we can detect
+% * Tested by local-scale ecological assembly
+% * Shown by niche-models
+Species' distributions are determined by interacting factors such as
+traits, climate, land-use, biotic interactions, and dispersal
+limitation \supercite{Pulliam2000,Ricklefs2004,Vellend2010}. Unpicking
+the relative contributions and mechanisms of these processes is
+challenging, but critical if we are to make predictions about
+biodiversity as these factors change simultaneously in the
+Anthropocene \supercite{Heller2009,Oliver2014,Urban2015}. While
+macroevolutionary biologists frequently argue that species'
+distributions tend to shown phylogenetic conservatism, the tendency
+for closely-related species to have similar niches
+\supercite{Wiens2004,Wiens2010}. Likewise, ecologists have shown that
+species' distributions are strongly driven by climate, either through
+correlative studies \supercite{xxx} or experimental studies
+\supercite{xxx}. While environment and climate are clearly not the
+only determinants of species' distributions, decades of research into
+niche distribution models have upheld the view that they are important
+\supercite{xxx}.
+
+% Species are responding to climate change
+% * Species' present-day distribution still show phylogenetic signal
+% * Species show local-scale assembly changes in manipulations and long-term studies
+% * Ecological niche modelers show that distributions are changing
+Species' distributions are undoubtedly responding to climate
+\supercite{Parmesan2003,Parmesan2006} and land-use
+\supercite{Newbold2015} changes. Species' contemporary distributions
+still, however, exhibit phylogenetic signal \supercite{xxx}, implying
+that these changes are continuations of past conditions. Equally,
+experimental studies \supercite{xxx}, and the ever-increasing number
+of observational studies of ongoing climate change \supercite{xxx},
+have shown that species' distributions and local-scale ecological
+assembly respond to climate. Niche modelers have shown that their
+models have some predictive power over species' distributions given
+past relationships with climate \supercite{xxx}. That there is broad
+consensus that ranges are changing does not mean there have not been
+debates over the precise implications and mechanisms of such
+changes. For example, the implications of range change for local-scale
+biodiversity is unclear
+\supercite{Vellend2013,Dornelas2014,Gonzalez2016}, we do not know
+whether species' environmental \emph{limits} or \emph{central
+  tendencies} are most-strongly conserved
+\supercite{deCasas2017,Zanne2018}, and there is a relative paucity of
+historic data with which to create historic
+baselines\supercite{Newbold2015,Meineke2018}.
+
+% Yet we do not know the extent to which species are tracking their niches
+% * We know there is idiosyncracy and that niche models do not always work well
+% * Could this be because we have yet to define the null model by which they should be assembling?
+% * Could this be because of a breakdown in the climate vectors of species? That heterogeneity is causing problems for species to track their climate?
+% * Here we present a framework that accounts for this.
+This consensus of species' past and present ranges broadly tracking
+the same underlying climate optima is complicated by paleo-ecological
+studies that have revealed greater variability of species' historic
+ranges in previous centuries and millennia than previously thought
+\supercite{Williams2007,Veloz2012,Maguire2015}. Critically, while
+species' present-day distributions have changed, and they are broadly
+similar to past distributions, we have yet to establish a historic
+benchmark by which to assess the magnitude of that tracking. Many
+species' distributions span continents, while others spans kilometers,
+and the velocity of climate change is not constant across those scales
+\supercite{xxx}. As climate continues to change, the underlying
+associations between axes of climate have changed \supercite{xxx}: if
+species are, as they must be \supercite{xxx}, ultimately limited by a
+single environmental axis, what are the consequences of this change
+for species' distributions? We argue there is a need for a synthetic
+measure of the extent to which species have tracked their niche
+through time, given the changes to which they have been exposed.
+
+\subsection*{Results and discussion}
+\textbf{A comparative index of species' niche tracking.} The efficacy
+of niche models to predict species' distributions is, in part, a
+measure of the extent to which species are tracking climate. Here we
+present a simple metric of species' degree of track, which we define
+as:
+
+\begin{equation}
+  track_\tau = \frac{present_\tau - past_\tau}{projected_\tau - past_\tau}
+\end{equation}
+
+Where $current_\tau$ is a given quantile ($\tau$) of a species'
+climatic range in the present, $past_\tau$ the same quantile of a
+species' range in the present, and $projected_\tau$ the same quantile
+of a species' present-day range under past climatic conditions. Thus a
+$track$ of 0 would indicate a species that has tracked changing
+climate perfectly, while a $track$ of 1 would be consistent with a
+species that had not moved whatsoever to track changing environmental
+conditions. Values between 0 and 1 suggest moderate tracking, while
+values greater than 1 or less than 0 represent a change in climate
+relationship greater than if the species had not moved at
+all. Uncertainty in either species' past or present ranges can be
+accounted for through a bootstrap procedure, whereby the past and/or
+present distributions are re-sampled (with replacement) to match the
+sampling of the other time-period, and the standard deviation of the
+index across those samples reported.
+
+Our approach has two main innovations: (1) a focus on the whole of a
+species' distribution and on (2) expected change. (1) We suggest that
+something of a disconnect is developing among related fields of
+ecology: species' range modelers typically focus on species'
+limits\supercite{xxx} (\emph{i.e.}, the upper and lower quantiles)
+while community ecologists focus on central tendencies\supercite{xxx}
+(\emph{i.e.}, the median). While there is some evidence plants' global
+distributions are more strongly driven by limits
+\supercite{Zanne2018}, we see no strong \emph{a priori} reason that
+species can, or must, track all quantiles equally\supercite{xxx}. Thus
+our approach is to check all quantiles of a species' distribution. (2)
+The denominator of our index re-scales species' change around an
+expectation under distributional stasis. We suggest that species'
+changes should be measured on the basis of the magnitude of change to
+which they are exposed. This change reflects the magnitude of
+ecological and evolutionary selection, and while we suggest there are
+many ways of addressing this, we suggest ours is the simplest and so
+perhaps a fair starting point.
+
+\textbf{Niche tracking across the tree of life throughout the past
+  sixty years.} To assess the extent to which species have tracked
+climate, we used the most comprehensively sampled time-series data for
+species' distributions (GBIF\supercite{xxx}) and climate (UEA's
+CRU\supercite{xxx}). We focus on only five quantiles within the data:
+the \nth{5}, \nth{25}, \nth{50} (median), \nth{75}, and \nth{95}. In
+the methods we give more detail of our reproducible analysis pipeline,
+and in the supplementary materials we repeat our analyses with more,
+and less, stringent data curation and cleaning. Here, however, we
+present species' range data collected from 1955--2015 for XXX species
+(XXX plants, XXX fungi, XXX mammals, XXX birds, XXX reptiles, XXX
+amphibians, and XXX insects), each observation matched to one of nine
+climate variables in the year in which they were sampled (mean,
+minimum, maximum temperature, diurnal temperature range,
+precipitation, wet-day frequency, vapor pressure, and cloud
+cover). We present, in the methods and supplementary materials, a more
+detailed analysis of how we accounted for potential and
+well-known\supercite{xxx} biases in these data, and we emphasize that
+our metric was designed explicitly to account for the known increase
+in sampling effort through time in GBIF data. We also highlight that
+our data support known linkages between species' climatic ranges and
+phylogenetic history and traits, suggesting our data reveal true
+underlying signal.
+
+Figure \ref{violin} shows the empirical index values for our focal
+taxa for mean temperature. Clear patterns emerge: a large number of
+species are, to some extent, tracking climate through time (XXX\%
+track at least one quantile, XXX\% track at least three, and XXX\%
+track all five). Of these taxa, XXX are, on average, tracking the best
+(XXX\% track at least one quantile) while XXX track the worst (XXX\%
+track at least one quantile).
+% To discuss: these percentages go up if we use the absolutised
+% version of the index, but I'm not sure that's appropriate anymore.
+Results for the other eight climate variables are comparable, and are
+presented in the supplementary materials. Notably, however, many taxa
+are not tracking climate through time, and many have experienced more
+change than if their distributions had remained static (XXX\% have
+`overshot' in at least three quantiles). These results are consistent
+with null simulations we performed of species' ranges that included
+some degree of climate tracking and empirically observed amounts of
+sampling effort changes through time and space in the GBIF data.
+
+\textbf{Idiosyncratic drivers of species' tracking.} To examine the
+potential drivers of species' ranges and range tracking, we first
+examined the phylogenetic signal of species' climate quantiles. We
+focused on mammals\supercite{xxx}, birds\supercite{xxx},
+amphibians\supercite{xxx}, reptiles\supercite{xxx}, and
+plants\supercite{xxx}, since we were able to find broadly inclusive,
+dated phylogenies for these taxa. We found statistically significant
+evidence of phylogenetic signal across XXX of 135
+taxon-climate-quantile combinations of species' past ranges (and XXX
+in the present; see figure \ref{phylogeny}). This is consistent with
+the known patterns of phylogenetic conservatism outlined above. For
+our index, however, we found evidence of phylogenetic signal in only
+XXX combinations (XXXlist themXXX). This confirms the known results
+that species' present-day and past ranges are strongly influenced by
+evolutionary, but suggests that the magnitude of change (relative to
+expectations) may be driven by different drivers.
+
+We additionally examined species' traits as potential drivers of
+species' distributions and potential to track changing environment. We
+focused on mammals\supercite{xxx}, birds\supercite{xxx}, and
+plants\supercite{xxx}, since global, openly-released trait datasets
+exist for these taxa. Again, we found statistically significant
+associations between traits and past distributions of XXX of XXX
+taxon-climate-quantile combinations (XXX in the present; see figure
+\ref{traits}). While the traits we used are strongly associated with
+species' climate responses\supercite{xxx} (hence their strong
+predictive power of species' distributions, but not tracking index),
+we emphasize that we do not examine traits related to dispersal
+ability. This is due to a paucity of open-access dispersal traits
+\supercite{xxx}, and we highlight that future work should address
+whether our index is explained by such drivers.
+% Another potential problem here is no trait*env interaction, which I
+% sense is also important...
+% WILL - re-do TEMP.INDEX ~ TEMP! THERMOPHILES!!!
+
+\textbf{Climate space is not the same as tracking space.} Given our
+index is poorly predicted by traditionally important variables, we now
+consider whether index values are predictive of each other. It is well
+known that global climate\supercite{xxx}, and so species' positions
+across the various axes of climate space\supercite{xxx}, are not
+independent, and so we set out to test whether species' tracking
+indices are also independent. As we show in figure \ref{pca}, a
+principal components analysis of species' present, past, and projected
+climate distributions shows strong correlations across climate
+variables. Yet the index does not: species' relative degree of
+tracking is both of much higher dimension, and shows relatively less
+correlation across climates axes. We argue, therefore, that while
+species' positions in climate space show strong associations, species'
+relative tracking of their position in climate space does not.
+
+If true, this result would explain the lack of association between
+species' traits and evolutionary history with their degree of climate
+tracking. The ecological and evolutionary rules that determine
+species' climate relationships are changing, and thus the factors that
+once are strong predictors of past and present distributions are not
+predictive of the differences between them. Yet there are alternative
+explanations, of which we highlight three: (1) that we have missed
+fundamentally important environmental axes, (2) biotic interactions,
+and (3) that our index highlights random variation in
+distribution. (1) We fully acknowledge that we ignore potentially
+relevant environmental drivers such as geology (and so soil), habitat,
+and all Anthropogenic factors other than climate. We are not alone in
+this simplification\supercite{xxx}, but we detect strong evolutionary
+pattern in the factors we do examine in the data underlying our
+index. (2) Competition and facilitation among species are likely
+strong drivers of species' ability to track climate\supercite{xxx}. We
+acknowledge it is entirely possible that ignoring these factors is the
+driver of our result and, if so, we urge for an acceleration of the
+inclusion of such information into broad-scale analyses
+\supercite{xxx}. (3) If species were perfectly tracking climate
+(\emph{i.e.}, $present_\tau$ is equal to $past_\tau$ in the absence of
+sampling error or some other stochastic process) then our index values
+would essentially be random numbers. There are good empirical evidence
+that this is not the case \supercite{xxx} but, as we show in the
+supplementary materials, simulations suggest out values are
+incompatible with this result.
+
+\subsection*{Conclusion}
+Our results are consistent with the processes underlying species'
+responses to climate change being distinct from those that generated
+their ranges in the past. That is not to say that we do not detect the
+imprint of ecological and evolutionary history, or that those earlier
+processes are of predictive power for species distributions, but
+rather that to understand change we must consider new drivers. We do
+not know what those drivers are, although we highlight that biotic
+interactions may play a part. We also highlight that our data,
+although comprehensive, are not taxonomically complete (we address
+only XXX species) and are necessarily spatially ($0.5^\circ$ grid
+cells) and temporally (yearly) coarse given the extent (global and 60
+years) of our study. We are not the first to suggest that, for large
+numbers of species, the extent of climate tracking is idiosyncratic
+\supercite{xxx}. These results are, however, consistent with the
+paleo-ecological record. During and after the last ice-age,
+`no-analogue' communities generated previously-unseen species
+assemblages \supercite{xxx}. Once previous mass extinction events were
+underway, species' extinctions became unpredictable
+\supercite{xxx}. Scientists have been warning for decades that we are
+beginning a sixth mass extinction;
+% Soule 1999 but find something earlier
+perhaps we are seeing the end of its beginning.
+
+\clearpage
+% Figures
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.7\textwidth]{../figures/violin-tmp-50.pdf}
+  \end{center}
+  \caption{\doublespacing \textbf{Empirical distributions of track
+      index for \nth{50} of mean temperature.} Need to add simulations
+    to plot. Add phylo-pics?}
+  \label{pca}
+\end{figure}
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.7\textwidth]{../figures/pca-50.pdf}
+  \end{center}
+  \caption{\doublespacing \textbf{Principal components analyses of
+      present and past climate, along with our index of climate
+      tracking.} Loadings are correlated (eigenvalues shown at bottom
+    of plot), but much weaker overall in index.}
+  \label{pca}
+\end{figure}
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=0.7\textwidth]{../figures/phylo-tmp-50.pdf}
+  \end{center}
+  \caption{\doublespacing \textbf{Phylogeny with ancestral states
+      branches of past temperature (50th quantile) and tips of the
+      temperature 50th index.} Scale between the two kinds of input
+    data currently is slightly off, hence no scale bar, and obviously
+    the tip colours are hideous, but I think no one would disagree
+    there's signal in the underlying data!}
+  \label{pca}
+\end{figure}
+
+% zoom in on one clade and show that the tips are a random subset (but the branches are not)
+% Will wonders if we can put the correlation matrix to the side of an upward-facing tree
+% have lines going outward from the tree to show mapping
+
+\begin{figure}[h!]
+  \begin{center}
+  \end{center}
+  \caption{\doublespacing \textbf{Trait correlation box.}
+    XXXmissingXXX}
+  \label{traits}
+\end{figure}
+
+\clearpage
+
+\textbf{Acknowledgments} WDP was funded by NSF ABI-1759965, NSF
+EF-1802605, and USDA Forest Service agreement 18-CS-11046000-041. TJD
+was funded by \emph{Fonds de Recherche Nature et Technologies} grant
+number 168004.
+
+\textbf{Author Contributions} WDP and TJD contributed to all aspects
+of the study.
+
+\textbf{Author information} Reprints and permissions information is
+available at \url{www.nature.com/reprints}. The authors declare no
+competing financial interests. Correspondence and requests for
+materials should be addressed to \url{will.pearse@usu.edu}.
+
+\textbf{Competing interests} The authors declare no competing
+financial interests
+
+\clearpage
+
+\section*{\Large Methods}
+
+\printbibliography
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

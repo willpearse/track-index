@@ -2,7 +2,7 @@
 source("src/headers.R")
 
 # Wrapper functions
-.calc.track.parallel <- function(data, quantiles, rasters){
+.calc.track.parallel <- function(data, quantiles, rasters, taxon){
     .int.calc <- function(sp){
         # Setup and subset data
         curr.data <- data[scientificname == sp,]
@@ -14,7 +14,7 @@ source("src/headers.R")
             dimnames=list(names(rasters), as.character(quantiles), c("index","bootstrap.index", "mad.index", "quantile","present","past","projected"))
         )
         if(nrow(pre.data) == 0 | nrow(post.data) == 0)
-            return(output)        
+            return(FALSE)        
         
         # Loop over rasters
         for(i in seq_along(rasters)){
@@ -36,12 +36,12 @@ source("src/headers.R")
             output[i,,] <- t(sapply(quantiles, function(x) .calc.metric(pre.data$pre.env, post.data$env, pre.data$post.env, x)))
         }
 
-        return(output)
+        saveRDS(output, paste0(output.dir,taxon,"/",sp,".RDS"))
+        return(TRUE)
     }
-
-    output <- mcMap(.int.calc, unique(data$scientificname))
-    output <- abind(output, along=4)
-    return(output)
+    
+    mcMap(.int.calc, unique(data$scientificname))
+    return(TRUE)
 }
 
 
@@ -71,10 +71,17 @@ cru <- list(
 )    
     
 # Do work and save results
-saveRDS(.calc.track.parallel(plants, quantiles, cru), paste0(output.dir,"index-plants.RDS"))
-saveRDS(.calc.track.parallel(mammals, quantiles, cru), paste0(output.dir,"index-mammals.RDS"))
-saveRDS(.calc.track.parallel(amphibians, quantiles, cru), paste0(output.dir,"index-amphibians.RDS"))
-saveRDS(.calc.track.parallel(fungi, quantiles, cru), paste0(output.dir,"index-fungi.RDS"))
-saveRDS(.calc.track.parallel(birds, quantiles, cru), paste0(output.dir,"index-birds.RDS"))
-saveRDS(.calc.track.parallel(insects, quantiles, cru), paste0(output.dir,"index-insects.RDS"))
-saveRDS(.calc.track.parallel(reptiles, quantiles, cru), paste0(output.dir,"index-reptiles.RDS"))
+print("mammals")
+.calc.track.parallel(mammals, quantiles, cru, "mammals")
+print("amphibians")
+.calc.track.parallel(amphibians, quantiles, cru, "amphibians")
+print("fungi")
+.calc.track.parallel(fungi, quantiles, cru, "fungi")
+print("insects")
+.calc.track.parallel(insects, quantiles, cru, "insects")
+print("reptiles")
+.calc.track.parallel(reptiles, quantiles, cru, "reptiles")
+print("plants")
+.calc.track.parallel(plants, quantiles, cru, "plants")
+print("birds")
+.calc.track.parallel(birds, quantiles, cru, "birds")

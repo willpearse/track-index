@@ -11,63 +11,90 @@ source("src/headers.R")
     colnames(output) <- names(data); rownames(output) <- c("r","p")
     return(output)
 }
+.combine.data <- function(index, quant, clean=10, abs=FALSE){
+    data <- .simplify.group(index, quant, clean, abs)
+    data$species <- rownames(data)
 
-# Load data
+    data$bm.neotoma <- neotoma$log.mass[match(data$species, neotoma$binomial)]
+    data$bm.elton <- elton.bm[data$species]
+
+    data$log.ll <- glopnet$log.LL[match(data$species, glopnet$Species)]
+    data$log.lma <- glopnet$log.LMA[match(data$species, glopnet$Species)]
+    data$log.Nmass <- glopnet$log.Nmass[match(data$species, glopnet$Species)]
+    data$log.Amass <- glopnet$log.Amass[match(data$species, glopnet$Species)]
+    return(data)    
+}
+.corr.mat <- function(index, quant, clean, abs=FALSE){
+    data <- .combine.data(index, quant, clean, abs)
+
+    c.var <- setNames(
+        c("cloud-cover","frost-days","potential-evapotranspiration","precipitation","min-temperature","mean-temperature","max-temperature","vapour-pressure"),
+                      c("cld","frs","pet","pre","tmn","tmp","tmx","vap")
+    )
+    q.var <- setNames(
+        c("5th","25th","50th","75th","95th"),
+        c("0.05","0.25","0.5","0.75","0.95")
+    )[quant]
+    t.var <- setNames(
+        c("body-mass","body-mass","leaf-lifespan","leaf-mass/area","leaf-N","photosynthetic-capacity"),
+        c("bm.neotoma","bm.elton","log.ll","log.lma","log.Nmass","log.Amass")
+    )
+    
+    mat <- matrix(nrow=6, ncol=8, dimnames=list(t.var, c.var))
+    for(i in seq_along(c.var)){
+        for(j in seq_along(t.var)){
+            mat[j,i] <- cor.test(data[,names(c.var)[i]], data[,names(t.var)[j]])$estimate
+        }
+    }
+    return(mat)
+}
+.plot.corr.mat <- function(index, comparison, quant, clean, abs=FALSE){
+    index.mat <- t(.corr.mat(index, quant, clean, abs))
+    comparison.mat <- t(.corr.mat(comparison, quant))
+    cols <- colorRampPalette(c("red", "white", "blue"))
+                   
+    comparison.cuts <- as.numeric(cut(as.numeric(comparison.mat), breaks=200))
+    comparison.cuts <- cols(200)[comparison.cuts]
+    index.cuts <- as.numeric(cut(as.numeric(index.mat), breaks=200))
+    index.cuts <- cols(200)[index.cuts]
+    dummy.mat <- matrix(0, nrow=nrow(index.mat), ncol=ncol(index.mat), dimnames=dimnames(index.mat))
+    
+    corrplot(comparison.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45)
+    corrplot(comparison.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45, bg=alpha("white",0), add=TRUE, addgrid.col=NA, col=colorRampPalette(c("blue","white", "blue"))(200), cl.pos="n", tl.pos="n")
+    corrplot(index.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45, bg=alpha("white",0), col=colorRampPalette(c("red","white", "red"))(200), add=TRUE, addgrid.col=NA, cl.pos="n", , tl.pos="n")
+}
+
+# Load tracking data
 plants <- readRDS("clean-data/plants-index.RDS")
 fungi <- readRDS("clean-data/plants-index.RDS")
 insects <- readRDS("clean-data/plants-index.RDS")
 mammals <- readRDS("clean-data/mammals-index.RDS")
 reptiles <- readRDS("clean-data/reptiles-index.RDS")
 birds <- readRDS("clean-data/birds-index.RDS")
+combined <- .simplify.group("bootstrap.index", "0.5", clean=10)
 
-neotoma <- read.csv("http://www.esapubs.org/archive/ecol/E096/269/Data_Files/Amniote_Database_Aug_2015.csv", as.is=TRUE)
-
-# Neotoma
+# Load Neotoma data
+neotoma <- read.csv("raw-data/Amniote_Database_Aug_2015.csv", as.is=TRUE)
+for(i in seq_along(names(neotoma)))
+    neotoma[neotoma[,i]==-999,i] <- NA
 neotoma$binomial <- with(neotoma, tolower(paste(genus, species, sep="_")))
-combined.index$log.mass <- neotoma$adult_body_mass_g[match(rownames(combined.index), neotoma$binomial)]
-combined.index$log.mass[combined.index$mass==-999] <- NA
-combined.index$log.mass <- log(combined.index$log.mass)
-.univariate(combined.index[,1:9], combined.index$log.mass)
+neotoma$log.mass <- log10(neotoma$adult_body_mass_g)
 
-#Glopnet
-library(gdata)
+# Load Glopnet
 glopnet <- read.xls("raw-data/glopnet.xls")
-combined.index$species <- rownames(combined.index)
-glopnet <- merge(glopnet, combined.index, by.x="Species", by.y="species")
-.univariate(glopnet[,names(combined.index)[1:9]], glopnet$log.LL)
-.univariate(glopnet[,names(combined.index)[1:9]], glopnet$log.LMA)
-.univariate(glopnet[,names(combined.index)[1:9]], glopnet$log.Nmass)
-.univariate(glopnet[,names(combined.index)[1:9]], glopnet$log.Amass)
+glopnet$Species <- tolower(gsub(" ", "_", glopnet$Species))
 
-
+# Load Elton
 elton.birds <- read.delim("raw-data/BirdFuncDat.txt", as.is=TRUE)
 elton.birds$Scientific <- tolower(gsub(" ", "_", elton.birds$Scientific))
 elton.mam <- read.delim("raw-data/MamFuncDat.txt", as.is=TRUE)
 elton.mam$Scientific <- tolower(gsub(" ", "_", elton.mam$Scientific))
-elton <- setNames(c(elton.mam$BodyMass.Value, elton.birds$BodyMass.Value), c(elton.mam$Scientific,elton.birds$Scientific))
-combined.index$elton.log.mass <- log(elton[combined.index$species])
-.univariate(combined.index[,1:9], combined.index$elton.log.mass)
-#... this gives the only thing I think is close: pre ~ elton.log.mass
+elton.bm <- setNames(c(elton.mam$BodyMass.Value, elton.birds$BodyMass.Value), c(elton.mam$Scientific,elton.birds$Scientific))
+elton.bm <- log10(elton.bm)
 
-#... playing around a little with only the present-day observations,
-#and I get something here for the body mass things. So I think this is
-#reassuring because it means there's some kind of pattern...
-
-
-# Simulating PCA stuff
-correls <- numeric(100)
-real <- prcomp(combined.pres[,1:9], scale=TRUE)
-for(i in seq_along(correls)){
-    past <- combined.past[,1:9]
-    for(i in seq_len(9))
-        past[,i] <- past[,i] + rnorm(nrow(past), sd=sd(abs(combined.pres[,i] - combined.past[,i])))
-    pres <- past
-    for(i in seq_len(9))
-        past[,i] <- past[,i] + rnorm(nrow(past), sd=sd(abs(combined.pres[,i] - combined.past[,i])))
-    diff <- pres - past
-    past.pca <- prcomp(past, scale=TRUE)
-    diff.pca <- prcomp(diff, scale=TRUE)
-    correls[i] <- mantel.test(abs(diff.pca$rotation), abs(past.pca$rotation))$z.stat
-}
-
-
+# Combine
+pdf("figures/traits-05.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.05", 5); dev.off()
+pdf("figures/traits-25.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.25", 5); dev.off()
+pdf("figures/traits-50.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.5", 5); dev.off()
+pdf("figures/traits-75.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.75", 5); dev.off()
+pdf("figures/traits-95.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.95", 5); dev.off()
