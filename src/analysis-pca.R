@@ -19,18 +19,19 @@ source("src/headers.R")
     index <- .simplify.group("bootstrap.index", quantile, clean=clean,  abs=abs)[,1:9]
     present <- .simplify.group("present", quantile, abs=abs)[,1:9]
     past <- .simplify.group("past", quantile, abs=abs)[,1:9]
+    browser()
     
-    layout(matrix(1:6, nrow=2, byrow=TRUE), widths=c(5,5,5), heights=c(5,1))
-    par(mar=c(1,1,1,1))
+    #layout(matrix(1:6, nrow=2, byrow=TRUE), widths=c(5,5,5), heights=c(5,1))
+    par(mar=c(1,1,1,1), mfrow=c(1,3))
     present <- prcomp(present, scale=TRUE)
     past <- prcomp(past, scale=TRUE)
     index <- prcomp(index, scale=TRUE)
     .pca.plot(past, 1:2, bty="o")
     .pca.plot(present, 1:2)
     .pca.plot(index, 1:2)
-    plot(past, main="")
-    plot(past, main="")
-    plot(index, main="")
+    #plot(past, main="")
+    #plot(past, main="")
+    #plot(index, main="")
 }
 
 # Load data

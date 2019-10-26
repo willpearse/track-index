@@ -24,11 +24,11 @@ source("src/headers.R")
     data$log.Amass <- glopnet$log.Amass[match(data$species, glopnet$Species)]
     return(data)    
 }
-.corr.mat <- function(index, quant, clean, abs=FALSE){
+.corr.mat <- function(index, quant, clean, abs=FALSE, p.val=FALSE){
     data <- .combine.data(index, quant, clean, abs)
 
     c.var <- setNames(
-        c("cloud-cover","frost-days","potential-evapotranspiration","precipitation","min-temperature","mean-temperature","max-temperature","vapour-pressure"),
+        c("clouds","frost","evapo-trans.","precipitation","min(temp)","mean(temp)","max(temp)","vapour"),
                       c("cld","frs","pet","pre","tmn","tmp","tmx","vap")
     )
     q.var <- setNames(
@@ -36,38 +36,51 @@ source("src/headers.R")
         c("0.05","0.25","0.5","0.75","0.95")
     )[quant]
     t.var <- setNames(
-        c("body-mass","body-mass","leaf-lifespan","leaf-mass/area","leaf-N","photosynthetic-capacity"),
+        c("body-mass","body-mass","leaf lifespan","leaf mass/area","leaf N","photosynth"),
         c("bm.neotoma","bm.elton","log.ll","log.lma","log.Nmass","log.Amass")
     )
     
     mat <- matrix(nrow=6, ncol=8, dimnames=list(t.var, c.var))
     for(i in seq_along(c.var)){
         for(j in seq_along(t.var)){
-            mat[j,i] <- cor.test(data[,names(c.var)[i]], data[,names(t.var)[j]])$estimate
+            if(p.val){
+                mat[j,i] <- cor.test(data[,names(c.var)[i]], data[,names(t.var)[j]])$p.value               
+            } else {
+                mat[j,i] <- cor.test(data[,names(c.var)[i]], data[,names(t.var)[j]])$estimate
+            }
         }
     }
     return(mat)
 }
 .plot.corr.mat <- function(index, comparison, quant, clean, abs=FALSE){
     index.mat <- t(.corr.mat(index, quant, clean, abs))
+    index.mat.p <- t(.corr.mat(index, quant, clean, abs, p.val=TRUE))
+    signif <- index.mat.p < .05
+    index.mat.p <- matrix(0, nrow=nrow(index.mat), ncol=ncol(index.mat))
+    index.mat.p[signif] <- 1
     comparison.mat <- t(.corr.mat(comparison, quant))
     cols <- colorRampPalette(c("red", "white", "blue"))
                    
-    comparison.cuts <- as.numeric(cut(as.numeric(comparison.mat), breaks=200))
+    comparison.cuts <- as.numeric(cut(as.numeric(comparison.mat), breaks=seq(-1,1,length.out=201)))
     comparison.cuts <- cols(200)[comparison.cuts]
-    index.cuts <- as.numeric(cut(as.numeric(index.mat), breaks=200))
+    index.cuts <- as.numeric(cut(as.numeric(index.mat), breaks=seq(-1,1,length.out=201)))
     index.cuts <- cols(200)[index.cuts]
     dummy.mat <- matrix(0, nrow=nrow(index.mat), ncol=ncol(index.mat), dimnames=dimnames(index.mat))
     
-    corrplot(comparison.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45)
-    corrplot(comparison.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45, bg=alpha("white",0), add=TRUE, addgrid.col=NA, col=colorRampPalette(c("blue","white", "blue"))(200), cl.pos="n", tl.pos="n")
-    corrplot(index.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45, bg=alpha("white",0), col=colorRampPalette(c("red","white", "red"))(200), add=TRUE, addgrid.col=NA, cl.pos="n", , tl.pos="n")
+    corrplot(comparison.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45, col=cols(200), tl.col="black")
+    corrplot(comparison.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45, bg=comparison.cuts, add=TRUE, addgrid.col=NA, col=alpha("white",0), cl.pos="n", tl.pos="n")
+    corrplot(index.mat, method="square", is.corr=FALSE, cl.lim=c(-1,1), tl.srt=45, bg=alpha("white",0), col=index.cuts, add=TRUE, addgrid.col=NA, cl.pos="n", , tl.pos="n", p.mat=index.mat.p, sig.level=.05)
+    text(-1.3, 9.5, "Legend", font=2)
+    rect(-1, 8.5, 0, 9.5, col=cols(200)[150], border=NA)
+    rect(-.8, 8.7, -.2, 9.3, col=cols(200)[120], border=NA)
+    text(-.5, 9.4, "present")
+    text(-.5, 9, "track\nindex")
 }
 
 # Load tracking data
 plants <- readRDS("clean-data/plants-index.RDS")
-fungi <- readRDS("clean-data/plants-index.RDS")
-insects <- readRDS("clean-data/plants-index.RDS")
+fungi <- readRDS("clean-data/fungi-index.RDS")
+insects <- readRDS("clean-data/insects-index.RDS")
 mammals <- readRDS("clean-data/mammals-index.RDS")
 reptiles <- readRDS("clean-data/reptiles-index.RDS")
 birds <- readRDS("clean-data/birds-index.RDS")
@@ -98,3 +111,32 @@ pdf("figures/traits-25.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.25
 pdf("figures/traits-50.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.5", 5); dev.off()
 pdf("figures/traits-75.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.75", 5); dev.off()
 pdf("figures/traits-95.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.95", 5); dev.off()
+corrplot(matrix(1:25, 5), p.mat=matrix(rep(0:1,length.out=25),5), is.corr=FALSE)
+
+# Correlations
+
+index.p <- c(
+    .corr.mat("bootstrap.index", "0.05", clean=100, p.val=TRUE),
+    .corr.mat("bootstrap.index", "0.25", clean=100, p.val=TRUE),
+    .corr.mat("bootstrap.index", "0.5", clean=100, p.val=TRUE),
+    .corr.mat("bootstrap.index", "0.75", clean=100, p.val=TRUE),
+    .corr.mat("bootstrap.index", "0.95", clean=100, p.val=TRUE)
+)
+sum(index.p < .05); length(index.p)
+
+pres.p <- c(
+    .corr.mat("present", "0.05", clean=NA, p.val=TRUE),
+    .corr.mat("present", "0.25", clean=NA, p.val=TRUE),
+    .corr.mat("present", "0.5", clean=NA, p.val=TRUE),
+    .corr.mat("present", "0.75", clean=NA, p.val=TRUE),
+    .corr.mat("present", "0.95", clean=NA, p.val=TRUE)
+)
+sum(pres.p < .05); length(pres.p)
+past.p <- c(
+    .corr.mat("pastent", "0.05", clean=NA, p.val=TRUE),
+    .corr.mat("pastent", "0.25", clean=NA, p.val=TRUE),
+    .corr.mat("pastent", "0.5", clean=NA, p.val=TRUE),
+    .corr.mat("pastent", "0.75", clean=NA, p.val=TRUE),
+    .corr.mat("pastent", "0.95", clean=NA, p.val=TRUE)
+)
+sum(past.p < .05); length(past.p)

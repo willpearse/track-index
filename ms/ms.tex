@@ -16,6 +16,7 @@
 \usepackage{filecontents}
 \usepackage{lineno} \linenumbers
 \usepackage{amsmath}
+\usepackage{pdflscape}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Bibliography%%%%%%%%%%%%%%%%%%%%%%
@@ -135,7 +136,7 @@ We currently lack robust estimates of how species are shifting their
 distributions in response to recent warming. The velocity of
 temperature change---the rate a species would have to shift its range
 to maintain constant temperature---has been calculated at 0.42 km/yr
-\supercite{Loarie2009}. A meta-analysis of taxonomic groupsestimated
+\supercite{Loarie2009}. A meta-analysis of taxonomic groups estimated
 the average pole-ward shift in species' distributions has been
 estimated as approximately 1.69 km/yr-1 \supercite{Chen2011},
 suggesting that species might be capable of keeping pace with shifting
@@ -153,7 +154,7 @@ We show that, on average, species' historical (pre-1970) ranges have
 warmed significantly, and that species have generally shifted their
 distributions to ameliorate this warming. Yet this general pattern
 masks a remarkably degree of variability in species responses: many
-species' ranges are now even warmer than if their distibutions had
+species' ranges are now even warmer than if their distributions had
 remained static. Further, we find that, while species' distributions
 are strongly predicted by their evolutionary history and functional
 traits, the same is not true of their degree of tracking. Thus while
@@ -193,7 +194,7 @@ deviation of the index across those samples reported (see methods).
 Our approach has two main innovations: its focus on (1) the whole of a
 species' distribution and(2) expected change. (1) We suggest that
 something of a disconnect is developing among related fields of
-ecology: species' range modelers typically focus on species'
+ecology: species' range modellers typically focus on species'
 limits\supercite{Sexton2009} (\emph{i.e.}, the upper and lower
 quantiles) while community ecologists \supercite{Tilman2004} and
 macro-evolutionary \supercite{Zanne2018} biologists focus on central
@@ -210,7 +211,7 @@ simplest and so perhaps a fair starting point. We note that our index
 could by re-scaling according to the distance that would need to be
 travelled to match the degree of change (\emph{sensu}
 \citeauthor{Loarie2009}\supercite{Loarie2009}), but prefer to present
-here a dimensionless (and so unitless) index of tracking.
+here a dimensionless (and so unit-less) index of tracking.
 % ...something like this? I re-wrote everything to be about the
 % "relative velocity of change" (which would have given us some fancy
 % notation if we wanted it) but as we don't use distances or speeds I
@@ -254,34 +255,38 @@ movement and a moderate degree of subsequent climate filtering.
 \textbf{Idiosyncratic drivers of species' tracking.} To examine the
 potential drivers of species' ranges and range tracking, we first
 examined the phylogenetic signal of species' climate quantiles. We
-focused on mammals\supercite{xxx}, birds\supercite{xxx},
-amphibians\supercite{xxx}, reptiles\supercite{xxx}, and
-plants\supercite{xxx}, since we were able to find broadly inclusive,
-dated phylogenies for these taxa. We found statistically significant
-evidence of phylogenetic signal across XXX of 135
-taxon-climate-quantile combinations of species' past ranges (and XXX
+focused on mammals\supercite{Faurby2015}, birds\supercite{Jetz2012},
+amphibians \supercite{Jetz2018}, reptiles \supercite{Zheng2016}, and
+plants\supercite{Smith2018}, since we were able to find broadly
+inclusive, dated phylogenies for these taxa. We found statistically
+significant evidence of phylogenetic signal across 158 of 180
+taxon-climate-quantile combinations of species' past ranges (and 153
 in the present; see figure \ref{phylogeny}). This is consistent with
 the known patterns of phylogenetic conservatism outlined above. For
 our index, however, we found evidence of phylogenetic signal in only
-XXX combinations (XXXlist themXXX). This confirms the known results
-that species' present-day and past ranges are strongly influenced by
-evolutionary, but suggests that the magnitude of change (relative to
-expectations) may be driven by different drivers.
+29 combinations. This confirms the known results that species'
+present-day and past ranges are strongly influenced by evolutionary,
+but suggests that the magnitude of change (relative to expectations)
+may be driven by different drivers.
+% Will: this is based on lambda *values* and so you need to update
+% this with p-values...
 
 We additionally examined species' traits as potential drivers of
 species' distributions and potential to track changing environment. We
-focused on mammals\supercite{xxx}, birds\supercite{xxx}, and
-plants\supercite{xxx}, since global, openly-released trait datasets
-exist for these taxa. Again, we found statistically significant
-associations between traits and past distributions of XXX of XXX
-taxon-climate-quantile combinations (XXX in the present; see figure
-\ref{traits}). While the traits we used are strongly associated with
-species' climate responses\supercite{xxx} (hence their strong
-predictive power of species' distributions, but not tracking index),
-we emphasize that we do not examine traits related to dispersal
-ability. This is due to a paucity of open-access dispersal traits
-\supercite{xxx}, and we highlight that future work should address
-whether our index is explained by such drivers.
+focused on mammals\supercite{Jones2009a,Wilman2014},
+birds\supercite{Wilman2014}, and plants\supercite{Wright2004}, since
+global, openly-released trait datasets exist for these taxa. Again, we
+found statistically significant associations between traits and past
+distributions of 193 of 240 taxon-climate-quantile combinations (203
+in the present at $\alpha_{5\%}$; see figure \ref{traits}), but not
+for between the traits and our tracking index (9 out of 240l
+4\%). While the traits we used are strongly associated with species'
+climate responses\supercite{Wright2004} (hence their strong predictive
+power of species' distributions, but not tracking index), we emphasise
+that we do not examine traits related to dispersal ability. This is
+due to a paucity of open-access dispersal traits
+\supercite{Gallagher2019}, and we highlight that future work should
+address whether our index is explained by such drivers.
 % Another potential problem here is no trait*env interaction, which I
 % sense is also important...
 % WILL - re-do TEMP.INDEX ~ TEMP! THERMOPHILES!!!
@@ -306,7 +311,10 @@ species' traits and evolutionary history with their degree of climate
 tracking. The ecological and evolutionary rules that determine
 species' climate relationships are changing, and thus the factors that
 once are strong predictors of past and present distributions are not
-predictive of the differences between them. Yet there are alternative
+predictive of the differences between them. A likely 
+
+
+Yet there are alternative
 explanations, of which we highlight three: (1) that we have missed
 fundamentally important environmental axes, (2) biotic interactions,
 and (3) that our index highlights random variation in
@@ -360,56 +368,114 @@ ranges in previous centuries and millennia than previously thought
 
 \clearpage
 % Figures
-
+\clearpage
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[width=0.7\textwidth]{../figures/violin-tmp-50.pdf}
+    \includegraphics[width=\textwidth]{../figures/violin-tmp-0-5.pdf}
   \end{center}
-  \caption{\doublespacing \textbf{Empirical distributions of track
-      index for \nth{50} of mean temperature.} Need to add simulations
-    to plot. Add phylo-pics?}
+  \caption{\doublespacing \textbf{Most species are tracking global
+      temperature, but there is pronounced variation among species and
+      clades.} The vertical axis shows the \nth{50} quantile of our
+    tracking index of annual mean temperature (boostrapped to account
+    for variation in sampling; see methods). On the left, our seven
+    major taxonomic groups plotted with the median and \nth{25} and
+    \nth{50} quantiles of their distributions highlighted. At the
+    far-right of the plot, output from our simulations of species that
+    are moving but either imperfectly tracking, or not tracking at
+    all, are shown. In the main text, we highlight that the majority
+    of species are tracking global climate, but there is profound
+    variation among species and clades. Fungi, insects, and reptiles
+    are, broadly, tracking the \nth{50} quantile of mean temperature
+    well, while other taxa (\emph{e.g.}, mammals and plants) are not.}
   \label{violin}
 \end{figure}
 
+\clearpage
+\begin{landscape}
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[width=0.7\textwidth]{../figures/pca-50.pdf}
+    \includegraphics[width=1.4\textwidth]{../figures/phylo-tmp-50.pdf}
   \end{center}
-  \caption{\doublespacing \textbf{Principal components analyses of
-      present and past climate, along with our index of climate
-      tracking.} Loadings are correlated (eigenvalues shown at bottom
-    of plot), but much weaker overall in index.}
+  \caption{\doublespacing \textbf{Despite strong phylogenetic signal
+      in species' static distributions, species' changes in
+      distributions are not phylogenetically patterned.} This is a
+    single sample from the posterior distribution of plant phylogenies
+    used for our analysis\supercite{Smith2018}. The two oldest
+    branches have been shortened for clarity of presentation
+    (emphasised with dashed lines). Its internal branches are
+    ancestral state reconstructions, assuming Brownian motion, of
+    species' median mean-temperature in the past. Its tips are
+    coloured according to the track index of the same underlying data
+    (compare with figure \ref{violin}). Both are coloured according to
+    the legend at the bottom of the figure. While this is but a single
+    plot (see also figure \ref{correls} and the supplementary
+    materials), this general pattern of strong phylogenetic signal of
+    climate, but not of degree of tracking, is true of almost all of
+    our underlying data (see main text).}
   \label{pca}
 \end{figure}
+\end{landscape}
 
+\clearpage
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[width=0.7\textwidth]{../figures/phylo-tmp-50.pdf}
+    \begin{subfigure}{.45\textwidth}
+      \includegraphics[width=\textwidth]{../figures/traits-50.pdf}
+      \caption{Trait correlations}
+    \end{subfigure}
+    \begin{subfigure}{.45\textwidth}
+      \includegraphics[width=\textwidth]{../figures/physig-5.pdf}
+      \caption{Phylogenetic signal}
+    \end{subfigure}
   \end{center}
-  \caption{\doublespacing \textbf{Phylogeny with ancestral states
-      branches of past temperature (50th quantile) and tips of the
-      temperature 50th index.} Scale between the two kinds of input
-    data currently is slightly off, hence no scale bar, and obviously
-    the tip colours are hideous, but I think no one would disagree
-    there's signal in the underlying data!}
-  \label{pca}
-\end{figure}
-
-% zoom in on one clade and show that the tips are a random subset (but the branches are not)
-% Will wonders if we can put the correlation matrix to the side of an upward-facing tree
-% have lines going outward from the tree to show mapping
-
-\begin{figure}[h!]
-  \begin{center}
-  \end{center}
-  \caption{\doublespacing \textbf{Trait correlation box.}
-    XXXmissingXXX}
+  \caption{\doublespacing \textbf{Species' static climate variables
+      show strong trait correlations and phylogenetic signal, but
+      their relative degree of tracking does not.} In (a), we show the
+    correlation between the median of each climate variable (rows)
+    with each of our traits (columns); colours are given at the right
+    of the figure. In each cell, the outer, larger box depicts the
+    correlation between species' present-day climate and the trait,
+    while the smaller, inner box the correlation for species' relative
+    tracking (whose size is proportional to intensity of
+    correlation). The 3 (of 54) track-index correlations that are
+    statistically significant (at $\alpha_{5\%}$) are highlighted with
+    crosses. In (b), we show the phylogenetic signal (Pagel's
+    $\lambda$\supercite{Pagel1999}) of the median of each taxonomic
+    group's (columns) median species' climate variables and relative
+    tracking indices (rows). As with (a), in each cell the outer,
+    larger box depicts the correlation between species' present-day
+    climate and the trait, while the smaller, inner box the
+    correlation for species' relative tracking (whose size is
+    proportional to phylogenetic signal strength). The single
+    track-index metric for which phylogenetic signal was stronger than
+    the underlying data is highlighted with a cross.}
   \label{traits}
 \end{figure}
 
 \clearpage
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=\textwidth]{../figures/pca-50.pdf}
+  \end{center}
+  \caption{\doublespacing \textbf{Species' movement through climate
+      space differs from their current positions within it.} Each of
+    our figures is a principal component analysis (PCA) biplots; in
+    (a) of species' median past climate values, in (b) median present
+    climate, and in (c) the median track-index of all climate
+    variables. A PCA biplot shows correlations among the underlying
+    data, with each axis explaining some amount of variation in the
+    underlying data (labelled on the axes themselves). In (a) and (b),
+    species' climate variables are correlated with one-another, and
+    the space reflects global patterns in climate. In (c), this
+    pattern has broken down: while some associations among climate
+    axes still remain (notably temperature), the general pattern is
+    one of independent shift through climate space.}
+  \label{pca}
+\end{figure}
 
-\textbf{Acknowledgments} WDP was funded by NSF ABI-1759965, NSF
+\clearpage
+
+\textbf{Acknowledgements} WDP was funded by NSF ABI-1759965, NSF
 EF-1802605, and USDA Forest Service agreement 18-CS-11046000-041. TJD
 was funded by \emph{Fonds de Recherche Nature et Technologies} grant
 number 168004.
@@ -428,6 +494,123 @@ financial interests
 \clearpage
 
 \section*{\Large Methods}
+\section*{\Large Methods}
+\renewcommand{\figurename}{Extended Data Figure}
+\renewcommand{\tablename}{Extended Data Table}
+  
+All analyses were conducted in \texttt{R} version \texttt{3.6.1}
+\autocite{R2018}. Code to reproduce all analyses in their entirety is
+available in the online supplementary materials.
+
+\subsection*{Data collation}
+
+\textbf{Occurrence data.} Species' distribution data were downloaded
+from the Global Biodiversity Information Facility (GBIF)
+\supercite{url_gbif,url_gbif_occurrences}. We downloaded only data
+highlighted by GBIF as not having any spatial issues, meaning they
+contained no obvious location errors (\emph{e.g.}, latitude/longitude
+swaps, coordinates that are rounded and so imprecise). These occurrence
+data include records that were flagged as having potential issues and
+then were corrected; in the supplementary materials, we show that
+excluding these records leads to qualitatively identical results. We
+present, in the main text, results from `human observation'
+occurrences (\emph{e.g.}, human surveys); in the supplementary
+materials observations based upon vouchered specimens (\emph{e.g.},
+pressed specimens in a herbarium) whose results are qualitatively
+identical. We worked only with occurrences from 1955--1980 and
+1990-2015 (see also `metric calculation' below). We only worked with
+species that had at least 1000 records on GBIF. This pragmatic
+threshold limits us to better-studied species, but in preliminary
+investigations we found our results to be robust to this threshold.
+
+\textbf{Climate data.} Climate data were downloaded from
+\citeauthor{Harris2014}\supercite{Harris2014}'s nine global
+time-series. We split the data into yearly (averaged) $0.5^\circ$
+cells, from which we estimated each of our nine climate variables for
+each species observation.
+
+\textbf{Trait and phylogenetic data.} Plant trait data were taken from
+\citeauthor{Wright2004}\supercite{Wright2004} (leaf lifespan, leaf
+mass-per-unit-area, leaf Nitrogen mass, and leaf photosynthetic
+capacity), mammal body mass data from PanTHERIA\supercite{Jones2009a}
+and EltonTraits \supercite{Wilman2014}, and bird body mass data from
+EltonTraits \supercite{Wilman2014}. We were unable to find sufficient
+coverage of the other taxa in this study in open-access trait
+databases to facilitate further analysis. We used existing global
+mammal\supercite{Faurby2015}, bird\supercite{Jetz2012}, amphibian
+\supercite{Jetz2018}, and plant\supercite{Smith2018} phylogenies,
+which contain posterior distributions of possible phylogenies which we
+used to account for uncertainty (see `Trait and phylogenetic analyses'
+below). For reptiles, we used
+\citeauthor{Zheng2016}\supercite{Zheng2016}, which is a single
+phylogeny and so we could not account for uncertainty with it in this
+way. We were unable to find dated, global phylogenies for the other
+taxa in this study.
+
+\textbf{Taxonomic cleaning.}  We only made use of data for which
+species identity was known, and we ignored variation among
+sub-species. Species' taxonomy has changed through time, and so is a
+potential source of bias in our analysis. As such, we used the World
+Conservation Union's species taxonomy, through
+\emph{taxize}\supercite{Chamberlain2013}, to harmonise all taxonomic
+information. In cases where a species' name could not be found on the
+IUCN, we retained that species in our analysis (since GBIF itself
+performs taxonomic cleaning and standardisation).
+
+\subsection*{Calculating and testing our track index}
+
+\textbf{Bootstrapping procedure to account for sampling bias and
+  empirical calculation of track index values.}  The sampling of
+species through time and across space is known to be uneven across the
+data in GBIF \supercite{Beck2013,Beck2014}. To ensure our method was
+statistically robust to such changes, we employed a bootstrap
+procedure during the calculation of $track_\tau$. To do this we
+randomly re-sampled, with replacement, the occurrences making up
+$present_\tau$ and $projected_\tau$ to be of the same number as
+$past_\tau$, and vice-versa for $past_\tau$ and $present_\tau$. We
+repeated this process 999 times, and report the median of the
+bootstrapped distribution of $track_\tau$ here in the main text. We
+applied this procedure to the occurrence data described above.
+
+\textbf{Estimating the track index in simulated data.} To assess the
+performance of our (bootstrapped) track index, we simulated species'
+whose ranges tracked climate to varying extents through time. Full
+results of the results of these simulations are given in the
+supplementary materials, and a selection of simulations are shown i
+figure \ref{violin}. Using the climate data from above in the years
+1962 and 2002 (the mid-points of the ranges of our data), we simulated
+species with varying maximum possible range sizes (1x1, 2x2, 5x5,
+10x10, 20x20, or 50x50 grid-cell extents) and varying possible
+latitudinal shifts in range ($\pm$1, 2, 5, or 10 grid-cells). We also
+varied two other parameters: a species' degree of environmental
+tracking ($\alpha$; taking a value of 0, 0.1, 0.2, ..., 0.9, or 1) and
+overall fraction of chance occupancy ($\sigma$; taking a value of 0,
+0.1, 0.2, ..., 0.9, or 1). Together, these two parameters define a
+species' probability of being present within a cell within its
+potential range:
+$(1-\alpha) \times sigma + \alpha \times \mathcal{N}$.  $\mathcal{N}$
+is defined as a scaled Normal probability density function with a mean
+equal to the median of the species' distribution in 1962 and a
+variance of 1. Thus a species with an $\alpha$ of 1 is present only in
+cells within its range that resemble its climatic centre, and a
+species with an $\alpha$ of 0 is present in proportion $\sigma$ of the
+cells within its potential range. We simulated all possible
+combinations of parameters 20 times, providing a full range of
+potential range shifts.
+% This needs more work!
+
+\subsection*{Trait and phylogenetic analyses}
+
+We calculated the Pearson's correlation between all estimated climatic
+niche variables ($present_\tau$, $past_\tau$, $projected_\tau$,
+$track_\tau$ and the bootstrapped $track_\tau$). While we show only a
+handful of these correlations in figure \ref{traits}, we provide all
+correlations in the supplementary figures (and note that the
+qualitative results of all correlations are the same). For the
+phylogenetic signal analyses, we likewise calculated Pagel's $\lambda$
+(using \emph{phytools}\supercite{Revell2012phytools}) for all indices,
+reporting all results in full in the supplementary materials (which
+are again qualitatively identical to the results in the main text).
 
 \printbibliography
 

@@ -43,7 +43,12 @@ source("src/headers.R")
     mcMap(.int.calc, unique(data$scientificname))
     return(TRUE)
 }
-
+.merge.results <- function(taxon){
+    files <- list.files(paste0(output.dir,taxon))
+    results <- Map(function(x) readRDS(paste0(output.dir,taxon,"/",x)), files)
+    names(results) <- gsub(".RDS", "", names(results), fixed=TRUE)
+    return(abind(results, along=4))
+}
 
 # Load and clean GBIF data
 plants <- .load.gbif(
@@ -85,3 +90,12 @@ print("plants")
 .calc.track.parallel(plants, quantiles, cru, "plants")
 print("birds")
 .calc.track.parallel(birds, quantiles, cru, "birds")
+
+# Merge the results back together again
+saveRDS(.merge.results("mammals"), paste0(output.dir,"mammals-index.RDS"))
+saveRDS(.merge.results("amphibians"), paste0(output.dir,"amphibians-index.RDS"))
+saveRDS(.merge.results("fungi"), paste0(output.dir,"fungi-index.RDS"))
+saveRDS(.merge.results("insects"), paste0(output.dir,"insects-index.RDS"))
+saveRDS(.merge.results("reptiles"), paste0(output.dir,"reptiles-index.RDS"))
+saveRDS(.merge.results("plants"), paste0(output.dir,"plants-index.RDS"))
+saveRDS(.merge.results("birds"), paste0(output.dir,"birds-index.RDS"))
