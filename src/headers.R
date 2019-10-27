@@ -35,6 +35,10 @@ if(!require("viridis")){
     install.packages("viridis"); library(viridis)}
 if(!require("plotrix")){
     install.packages("plotrix"); library(plotrix)}
+if(!require("png")){
+    install.packages("png"); library(png)}
+if(!require("grid")){
+    install.packages("grid"); library(grid)}
 
 ####################################
 # Global settings ##################
@@ -66,8 +70,10 @@ prog.bar <- function(x, y){
                 tryCatch(if(z[1] < 1) if((length(z) %% 10)==0) cat("|") else cat("."), error=function(z) cat("."))
         }
 }    
-.load.gbif <- function(obs, specimens, min.records=2000, clean.binomial=FALSE){
+.load.gbif <- function(obs, specimens, min.records=2000, clean.binomial=FALSE, clean.gbif=FALSE){
     data <- data.table(scientificname="", decimallatitude=0.0, decimallongitude=0.0, year=0, type="")
+    if(clean.gbif)
+        data$issue <- ""
     if(!missing(obs)){
         tmp <- fread(obs)
         tmp$type <- "observations"
@@ -82,6 +88,9 @@ prog.bar <- function(x, y){
         stop("Must supply *some* data to load!...")
     data <- data[-1,]
 
+    if(clean.gbif)
+        data <- data[issue == "",]
+    
     if(clean.binomial){
         spp <- unique(data$scientificname)
         spp <- setNames(tolower(sapply(strsplit(spp, " "), function(x) paste(x[1:2], collapse="_"))), spp)
@@ -204,6 +213,7 @@ prog.bar <- function(x, y){
         data.frame(.simplify(insects, index, quantile, clean, abs), taxon="insects"),
         data.frame(.simplify(mammals, index, quantile, clean, abs), taxon="mammals"),
         data.frame(.simplify(reptiles, index, quantile, clean, abs), taxon="reptiles"),
+        data.frame(.simplify(amphibians, index, quantile, clean, abs), taxon="amphibians"),
         data.frame(.simplify(birds, index, quantile, clean, abs), taxon="birds")
     ))
 .simplify.quantile <- function(index, var, clean=NA, abs=FALSE)

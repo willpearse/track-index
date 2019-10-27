@@ -4,11 +4,12 @@
 # data elsewhere
 
 Dir.chdir "~/bear-share/gbif/"
-def download_wrapper(gbif_id, taxon, clean_csv=true, clean_zip=true)
+def download_wrapper(gbif_id, taxon, clean_csv=true, clean_zip=true, clean_gbif=false)
   Dir.chdir taxon
   `wget http://api.gbif.org/v1/occurrence/download/request/#{gbif_id}.zip`
   `unzip #{gbif_id}.zip #{gbif_id}.csv`
   `cut -f13,17,18,28 #{gbif_id}.csv > #{gbif_id}_abbreviated.txt`
+  `cut -f13,17,18,28,44 #{gbif_id}.csv > #{gbif_id}_short_issues.txt`
   if clean_csv then `rm #{gbif_id}.csv` end
   if clean_zip then `rm #{gbif_id}.zip` end
   Dir.chdir '..'
@@ -24,5 +25,4 @@ download_wrapper "0034726-180508205500799" "insecta"
 download_wrapper "0000171-180412121330197" "mammalia"
 download_wrapper "0001849-180131172636756" "plantae"
 download_wrapper "0001851-180131172636756" "plantae"
-download_wrapper "0001847-180131172636756" "pompilidae"
 download_wrapper "0034728-180508205500799" "reptillia"

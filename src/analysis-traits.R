@@ -133,10 +133,10 @@ pres.p <- c(
 )
 sum(pres.p < .05); length(pres.p)
 past.p <- c(
-    .corr.mat("pastent", "0.05", clean=NA, p.val=TRUE),
-    .corr.mat("pastent", "0.25", clean=NA, p.val=TRUE),
-    .corr.mat("pastent", "0.5", clean=NA, p.val=TRUE),
-    .corr.mat("pastent", "0.75", clean=NA, p.val=TRUE),
-    .corr.mat("pastent", "0.95", clean=NA, p.val=TRUE)
+    .corr.mat("past", "0.05", clean=NA, p.val=TRUE),
+    .corr.mat("past", "0.25", clean=NA, p.val=TRUE),
+    .corr.mat("past", "0.5", clean=NA, p.val=TRUE),
+    .corr.mat("past", "0.75", clean=NA, p.val=TRUE),
+    .corr.mat("past", "0.95", clean=NA, p.val=TRUE)
 )
 sum(past.p < .05); length(past.p)

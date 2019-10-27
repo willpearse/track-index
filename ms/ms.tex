@@ -52,8 +52,17 @@
 \DeclareFieldFormat*{title}{#1}
 \addbibresource{/home/will/Papers/Library.bib}
 \begin{document}
+
+% To-do before bioRxiv:
+% * p-values in lambda
+% * change years in simulation
+% * check taxa numbers in violin plot
+% * add copyright information for phylopics
+% * add sigma into the range simulation code
+% * not a track index. But what is it?...
+% * can you get more birds into the manuscript? They seem to be being dropped somewhere (perhaps at the pre-processing step?)
 \section*{Title page}
-\textbf{Article title}: The relative velocity of climate change
+\textbf{Article title}: The realised velocity of climate change
 reveals remarkable idiosyncrasy of species' distributional shifts
 
 \textbf{Authors:} William D.\ Pearse$^{1,*}$ \& T.\ Jonathan
@@ -62,8 +71,8 @@ Davies$^{2,*}$
 $^1$ Department of Biology \& Ecology Center, Utah State University,
 5305 Old Main Hill, Logan UT, 84322
 
-$^2$ Department of Biological Sciences, Universit\'{e} du Qu\'{e}bec
-\`{a} Montr\'{e}al, Montr\'{e}al, Qu\'{e}bec, Canada
+$^2$ Department of Biological Sciences, University of British
+Columbia, Vanouver, Canada
 
 $^*$ To whom correspondence should be addressed:
 \url{will.pearse@usu.edu} and \url{j.davies@ubc.ca}
@@ -77,21 +86,21 @@ $^*$ To whom correspondence should be addressed:
   global overview of species' distributional responses to changing
   climate across a broad variety of taxa (animals, plants, and
   fungi). We characterise species' responses using a metric that
-  describes the biotic velocity of climate change: how closely
+  describes the realised velocity of climate change: how closely
   species' responses have tracked changing climate through time
-  climate. In contrast to existing metrics that focus purely on space,
-  we focus on species, and thus can examine drivers of interspecific
-  variation. Here we show that species responses are highly
-  idiosyncratic, and thus previous analyses assuming uniform responses
-  may be misleading. This is in stark contrast to species' static
-  present-day and past distributions, which show strong evidence of
-  the imprint of evolutionary history and functional traits. Our
-  analyses are a first step in exploring the vast wealth of empirical
-  data on species' historic responses to recent climate change. We
-  highlight that our findings, while surprising, are consistent with
-  paleontological patterns observed at the onset of mass extinction
-  events.}
-% Is that last sentence a bit much?
+  climate. In contrast to existing `climate velocity' metrics that have focused on space,
+  we focus on species and their null expectation of change
+  % The null expectation bit is new; I think this is a novelty, no?
+  , and thus can examine drivers of inter-specific variation. Here we
+  show that species are tracking climate on average, but not
+  sufficiently to keep up with the pace of climate change. Further,
+  species responses are highly idiosyncratic, and thus previous
+  projections assuming uniform responses may be misleading. This is in
+  stark contrast to species' present-day and historical niche
+  dimensions, which show strong evidence of the imprint of
+  evolutionary history and functional traits. Our analyses are a first
+  step in exploring the vast wealth of empirical data on species'
+  historic responses to recent climate change.}
 
 The natural environment is changing rapidly. Over the last century,
 habitats have become increasingly fragmented and
@@ -99,12 +108,12 @@ isolated\supercite{Haddad2015}, the climate has become warmer, and
 extreme climate events more frequent\supercite{IPCC2014}. Biological
 diversity---the species of plants and animals with which we cohabit
 the Earth---has responded predictably. Present-day extinction rates
-are estimated to be three orders of magnitude greater than background
+are estimated to be up to three orders of magnitude greater than background
 rates \supercite{Pimm2014} and are projected to increase further over
 the next several decades \supercite{MEA2005}. Current estimates
-suggest that over at least one million species may be threatened with
+suggest that over one million species may be threatened with
 extinction\supercite{IPBESland2019}, and that we have experienced a
-50\% decline in animal diversity over the past 40 years
+50\% decline in animal diversity in the past 40 years
 \supercite{McLellan2014}.
 
 The main direct human-induced drivers that impact biodiversity now are
@@ -113,53 +122,68 @@ habitat loss \supercite{Newbold2015} and fragmentation
 dominant driver in the next few
 decades\supercite{Parmesan2003,Thuiller2007,Urban2015}. Projected
 impacts of climate change on biodiversity have attracted much
-attention, and it has been suggested that up to 37\% of species may be
-committed to global extinction by 2050\supercite{Thomas2004}. In the
-face of changing climate species must either shift in space, to track
-favourable conditions, or time, for example, flowering and breeding
-earlier, or migrating sooner. Evidence suggests they are doing both
-\supercite{Parmesan2003,Parmesan2006,Menzel2006,Chen2011}, but not all
-species are responding equally. Some species are expanding their
-distributions, sometimes invasively \supercite{Hellmann2008}, and some
-species are flowering later\supercite{Cook2012}; species may also be
-simply becoming less predictable \supercite{Pearse2017phenology}.
-% I feel this isn't just a token cite; we want to set up our result a
-% little, I think
-Developing robust predictions of ecological responses to climate
-change thus requires data from diverse species, ecosystems, and
-climates to account for these varying drivers. By contrast, current
-projections frequently assume a simplistic or uniform response, and
-have tended to overlook interspecific variation.
-% I'm not sure I necessarily agree with this statement
+attention, but the uncertainty around the magnitude of future
+extinctions (\emph{e.g.}, 37\%\supercite{Thomas2004} vs.\
+7.9\%\supercite{Urban2015} of species) means more work is needed.  In
+the face of changing climate species must either shift in space, to
+track favourable conditions, or time, for example, flowering and
+breeding earlier, or migrating sooner. Evidence suggests they are
+doing both \supercite{Parmesan2003,Parmesan2006,Menzel2006,Chen2011},
+but not all species are responding equally. Some species are expanding
+their distributions, sometimes invasively \supercite{Hellmann2008},
+and some species are flowering later\supercite{Cook2012}; species may
+also be simply becoming less predictable
+\supercite{Pearse2017phenology}, perhaps as evolved responses to
+environmental cues break down.  Simply quantifying species' mean
+responses ignores the important variability in responses among species
+\supercite{Wolkovich2012}. Developing robust predictions of ecological
+responses to climate change thus requires data from diverse species,
+ecosystems, and climates to account for this large inter-specific
+variation.
+% Better, I think, thank you. I think there was something about the
+% previous phrasing that sounded a bit too much like we were knocking
+% people's stats, rather than the concepts, if that makes sense?
 
-We currently lack robust estimates of how species are shifting their
-distributions in response to recent warming. The velocity of
+The velocity of
 temperature change---the rate a species would have to shift its range
 to maintain constant temperature---has been calculated at 0.42 km/yr
 \supercite{Loarie2009}. A meta-analysis of taxonomic groups estimated
 the average pole-ward shift in species' distributions has been
-estimated as approximately 1.69 km/yr-1 \supercite{Chen2011},
+approximately 1.69 km/yr \supercite{Chen2011},
 suggesting that species might be capable of keeping pace with shifting
-climate. Yet this estimate is derived from just a handful of studies,
-and does not address the large variation in response among species.
-Here we leverage the vast volume of distributional data stored in
-digital data repositories\supercite{url_gbif} to provide the first
-global synthesis of species distributional responses to climate
-change. By contrasting historical niche dimensions with those of the
-present day, we can characterise the true biotic velocity of climate
-change, which represents the actual velocity with which species track
-climate across space.
+climate.
+% You questioned the 1.69 figure - this text is from you! :D
+% - I agree, though, that I'm not sure this estimate is fair. I looked
+%   in the supplement and there's a remarkable lack of data going into
+%   the estimate, to be honest with you... Is this sufficiently polite
+%   to address that? They also don't address the file-drawer effect at all.
+Yet this estimate is derived from just 21 studies with taxonomic bias
+reflecting the state of the field at the time (361 birds, 9 mammals,
+and no plants)
+% I want to make sure we're nice about this point, because it's a
+% meta-analysis so it's hardly their fault! Also one of my PhD
+% supervisors is on this paper :p
+, and critically not address the large variation in response among
+species or within taxa. Here we leverage the vast volume of
+distributional data stored in digital data
+repositories\supercite{url_gbif} to provide the first global synthesis
+of species distributional responses to climate change. By contrasting
+historical niche dimensions with those of the present day, we can
+characterise the realised biotic velocity of climate change, which
+represents the actual velocity with which species track climate across
+space.
 
-We show that, on average, species' historical (pre-1970) ranges have
+We show that, on average, species' historical (pre-1980) ranges have
 warmed significantly, and that species have generally shifted their
-distributions to ameliorate this warming. Yet this general pattern
-masks a remarkably degree of variability in species responses: many
-species' ranges are now even warmer than if their distributions had
-remained static. Further, we find that, while species' distributions
-are strongly predicted by their evolutionary history and functional
-traits, the same is not true of their degree of tracking. Thus while
-species' static distributions are reasonably predictable, their
-changes in distributions are not.
+distributions to ameliorate this warming, but not sufficiently to keep
+pace with climate change. Yet this general pattern Yet this general
+pattern masks a remarkably degree of variability in species responses:
+many species' ranges are now even warmer than if their distibutions
+had remained static. Further, we find that, while species' niche
+dimensions are strongly predicted by their evolutionary history and
+functional traits, the same is not true of their degree of
+tracking. Thus while species' distributions are reasonably
+predictable, their changes in distributions are not.
 
 \clearpage
 \subsection*{Results and discussion}
@@ -170,7 +194,7 @@ would have experienced had it not shifted its distribution. Formally,
 we define this as:
 
 \begin{equation}
-  track_\tau = \frac{present_\tau - past_\tau}{projected_\tau - past_\tau}
+  track_\tau = \frac{current_\tau - past_\tau}{projected_\tau - past_\tau}
 \end{equation}
 
 Where $current_\tau$ is a given quantile ($\tau$) of a species'
@@ -185,60 +209,65 @@ consistent with a species that had not moved whatsoever to track
 changing environmental conditions. Values between 0 and 1 suggest
 moderate tracking, while values greater than 1 or less than 0
 represent a change in climate relationship greater than if the species
-had not moved at all. Uncertainty in either species' past or present
+had not moved at all. Uncertainty in either species' past or current
 ranges can be accounted for through a bootstrap procedure, whereby the
-past and/or present distributions are re-sampled (with replacement) to
+past and/or current distributions are re-sampled (with replacement) to
 match the sampling of the other time-period, and the standard
 deviation of the index across those samples reported (see methods).
 
 Our approach has two main innovations: its focus on (1) the whole of a
-species' distribution and(2) expected change. (1) We suggest that
-something of a disconnect is developing among related fields of
-ecology: species' range modellers typically focus on species'
+species' distribution and (2) expected change. (1) Species' range modelers typically focus on species'
 limits\supercite{Sexton2009} (\emph{i.e.}, the upper and lower
 quantiles) while community ecologists \supercite{Tilman2004} and
 macro-evolutionary \supercite{Zanne2018} biologists focus on central
-tendencies (\emph{i.e.}, the median). We therefore see no strong
+tendencies (\emph{i.e.}, the median). We see no strong
 \emph{a priori} reason that species can, or must, track all quantiles
-equally, and so our approach is to check all quantiles of a species'
-distribution. (2) The denominator of our index re-scales species'
-change around an expectation under distributional stasis. We suggest
-that species' changes should be measured on the basis of the magnitude
-of change to which they are exposed. This change reflects the
-magnitude of ecological and evolutionary selection, and while we
-suggest there are many ways of addressing this, we suggest ours is the
-simplest and so perhaps a fair starting point. We note that our index
-could by re-scaling according to the distance that would need to be
-travelled to match the degree of change (\emph{sensu}
-\citeauthor{Loarie2009}\supercite{Loarie2009}), but prefer to present
-here a dimensionless (and so unit-less) index of tracking.
-% ...something like this? I re-wrote everything to be about the
-% "relative velocity of change" (which would have given us some fancy
-% notation if we wanted it) but as we don't use distances or speeds I
-% feel we ought not to?
+equally. Indeed some evidence suggests different constraints on species
+warm range limts versus their cool range limits, with biotic interactions more influential in the former,
+and climate determining the latter\supercite{Freeman2018}.
+It is possible, therefore, that shifts at species' range edges may be disconnected
+from changes towards the centre of their distribution.
+% phrase better?
+Our approach is to check all quantiles of a species' distribution. (2)
+The denominator of our index re-scales species' change around an
+expectation under distributional stasis. We suggest that species'
+distributional responses should be measured on the basis of the
+magnitude of change to which they are exposed. This change reflects
+the magnitude of ecological and evolutionary selection, and while
+there are many ways of addressing this, we suggest ours is perhaps the
+simplest and most transparent, so perhaps represents a fair starting
+point. We note that we could also rescale our index according to the
+distance that would need to be travelled to maintain climate stasis
+(\emph{sensu} \citeauthor{Loarie2009}\supercite{Loarie2009}), but
+prefer to present here a dimensionless (and so unitless) index of
+tracking, which is simpler to compare across taxa and between
+biogeographic regions.
+% You ask if we could make a map of this. We could, but I don't think
+% we could by Tuesday...
 
 \textbf{Niche tracking across the tree of life throughout the past
   sixty years.} To assess the extent to which species have tracked
 climate, we used the most comprehensively sampled time-series data for
 species' distributions (GBIF\supercite{url_gbif}) and climate (UEA's
-CRU\supercite{Harris2014}). We focus on five quantiles: the \nth{5},
-\nth{25}, \nth{50} (median), \nth{75}, and \nth{95}. In the methods we
-give more detail of our reproducible analysis pipeline, and in the
-supplementary materials we repeat our analyses with different data
-curation and cleaning choices. Here, however, we present species'
-range data collected from 1955--2015 for 10,700 species (4,879 plants,
+CRU\supercite{Harris2014}). This represents over 320 Gb of occurrence
+data, collected over the past century.
+% Perhaps now you see why I keep having panic attacks about running
+% everything through!...
+We focus on five quantiles: the \nth{5},
+\nth{25}, \nth{50} (median), \nth{75}, and \nth{95}. Here, we present species' range data collected from 1955--2015 for 10,700 species (4,879 plants,
 1,517 fungi, 273 mammals, 433 birds, 147 reptiles and amphibians, and
 3,451 insects), each observation matched to one of nine climate
 variables in the year in which they were sampled (mean, minimum,
-maximum temperature, diurnal temperature range, precipitation, wet-day
-frequency, vapour pressure, and cloud cover). Our metric was designed
-to account for known biases in the GBIF data \supercite{Beck2014}, and
+maximum temperature, diurnal temperature range, precipitation, 'rainy-day'
+frequency, vapour pressure, and cloud cover). In the methods we
+give more detail of our reproducible analysis pipeline, and in the
+supplementary materials we repeat our analyses with different data
+curation and cleaning choices. Our metric was designed to account for known biases in the GBIF data \supercite{Beck2014}, and
 we present in the supplementary materials additional analyses that
 address and account for such biases.
 
-Figure \ref{violin} shows the empirical index values for our focal
-taxa for mean temperature. Clear patterns emerge: 99.5\% of species
-are tracking some climate variable through time, and a large number of
+Figure \ref{violin} shows observed index values for mean temperature.
+Almost all species, 99.5\%, are tracking some climate variable through time, and a large number of
 species are, to some extent, tracking temperature through time (65\%
 track at least one quantile, 43\% track at least two, and 4\% track
 all five). The three temperature indices are the least-tracked of any
@@ -251,6 +280,8 @@ figure \ref{violin}, and explore further in the supplementary
 materials, these results are consistent with our null simulations
 where species' range change is a combination of essentially random
 movement and a moderate degree of subsequent climate filtering.
+% Jonathan is getting confused about the numbers
+% 99% vs. XXX%; be clearer
 
 \textbf{Idiosyncratic drivers of species' tracking.} To examine the
 potential drivers of species' ranges and range tracking, we first
@@ -265,7 +296,7 @@ in the present; see figure \ref{phylogeny}). This is consistent with
 the known patterns of phylogenetic conservatism outlined above. For
 our index, however, we found evidence of phylogenetic signal in only
 29 combinations. This confirms the known results that species'
-present-day and past ranges are strongly influenced by evolutionary,
+current-day and past ranges are strongly influenced by evolutionary,
 but suggests that the magnitude of change (relative to expectations)
 may be driven by different drivers.
 % Will: this is based on lambda *values* and so you need to update
@@ -298,7 +329,7 @@ known that global climate\supercite{xxx}, and so species' positions
 across the various axes of climate space\supercite{xxx}, are not
 independent, and so we set out to test whether species' tracking
 indices are also independent. As we show in figure \ref{pca}, a
-principal components analysis of species' present, past, and projected
+principal components analysis of species' current, past, and projected
 climate distributions shows strong correlations across climate
 variables. Yet the index does not: species' relative degree of
 tracking is both of much higher dimension, and shows relatively less
@@ -310,7 +341,7 @@ If true, this result would explain the lack of association between
 species' traits and evolutionary history with their degree of climate
 tracking. The ecological and evolutionary rules that determine
 species' climate relationships are changing, and thus the factors that
-once are strong predictors of past and present distributions are not
+once are strong predictors of past and current distributions are not
 predictive of the differences between them. A likely 
 
 
@@ -329,7 +360,7 @@ acknowledge it is entirely possible that ignoring these factors is the
 driver of our result and, if so, we urge for an acceleration of the
 inclusion of such information into broad-scale analyses
 \supercite{xxx}. (3) If species were perfectly tracking climate
-(\emph{i.e.}, $present_\tau$ is equal to $past_\tau$ in the absence of
+(\emph{i.e.}, $current_\tau$ is equal to $past_\tau$ in the absence of
 sampling error or some other stochastic process) then our index values
 would essentially be random numbers. There are good empirical evidence
 that this is not the case \supercite{xxx} but, as we show in the
@@ -360,7 +391,7 @@ beginning a sixth mass extinction;
 % Soule 1999 but find something earlier
 perhaps we are seeing the end of its beginning.
 
-This consensus of species' past and present ranges broadly tracking
+This consensus of species' past and current ranges broadly tracking
 the same underlying climate optima is complicated by paleo-ecological
 studies that have revealed greater variability of species' historic
 ranges in previous centuries and millennia than previously thought
@@ -455,12 +486,24 @@ ranges in previous centuries and millennia than previously thought
 \clearpage
 \begin{figure}[h!]
   \begin{center}
-    \includegraphics[width=\textwidth]{../figures/pca-50.pdf}
+    \begin{subfigure}{.45\textwidth}
+      \includegraphics[width=\textwidth]{../figures/pca-05-past.pdf}
+      \caption{Past climate space (1955--1980)}
+    \end{subfigure}
+    \begin{subfigure}{.45\textwidth}
+      \includegraphics[width=\textwidth]{../figures/pca-05-present.pdf}
+      \caption{Present climate space (1990--2015)}
+    \end{subfigure}
+    \begin{subfigure}{.45\textwidth}
+      \includegraphics[width=\textwidth]{../figures/pca-05-index.pdf}
+      \caption{Tracking climate space}
+    \end{subfigure}
   \end{center}
+  % Note: bad filenames I know, but these are the 50th (i.e., median) entries
   \caption{\doublespacing \textbf{Species' movement through climate
       space differs from their current positions within it.} Each of
     our figures is a principal component analysis (PCA) biplots; in
-    (a) of species' median past climate values, in (b) median present
+    (a) of species' median past climate values, in (b) median current
     climate, and in (c) the median track-index of all climate
     variables. A PCA biplot shows correlations among the underlying
     data, with each axis explaining some amount of variation in the
@@ -498,38 +541,44 @@ financial interests
 \renewcommand{\figurename}{Extended Data Figure}
 \renewcommand{\tablename}{Extended Data Table}
   
-All analyses were conducted in \texttt{R} version \texttt{3.6.1}
-\autocite{R2018}. Code to reproduce all analyses in their entirety is
+All analyses were conducted in \emph{R} version \texttt{3.6.1}
+\autocite{R2018}, and all names in \emph{italics} refer to \emph{R}
+packages. Code to reproduce all analyses in their entirety is
 available in the online supplementary materials.
 
 \subsection*{Data collation}
 
-\textbf{Occurrence data.} Species' distribution data were downloaded
-from the Global Biodiversity Information Facility (GBIF)
+Species' distribution data were downloaded from the Global
+Biodiversity Information Facility (GBIF)
 \supercite{url_gbif,url_gbif_occurrences}. We downloaded only data
 highlighted by GBIF as not having any spatial issues, meaning they
 contained no obvious location errors (\emph{e.g.}, latitude/longitude
-swaps, coordinates that are rounded and so imprecise). These occurrence
-data include records that were flagged as having potential issues and
-then were corrected; in the supplementary materials, we show that
-excluding these records leads to qualitatively identical results. We
-present, in the main text, results from `human observation'
-occurrences (\emph{e.g.}, human surveys); in the supplementary
-materials observations based upon vouchered specimens (\emph{e.g.},
-pressed specimens in a herbarium) whose results are qualitatively
-identical. We worked only with occurrences from 1955--1980 and
-1990-2015 (see also `metric calculation' below). We only worked with
-species that had at least 1000 records on GBIF. This pragmatic
-threshold limits us to better-studied species, but in preliminary
-investigations we found our results to be robust to this threshold.
+swaps or rounded coordinates). These occurrence data include records
+that were flagged as having potential issues and corrected by GBIF;
+our results were qualitatively identical if we excluded these records
+and so we include them here for completeness. We used `human
+observation' occurrences (\emph{e.g.}, records from surveys), and not
+vouchered specimens (\emph{e.g.}, pressed specimens in a herbarium)
+because preliminary analysis revealed qualitatively identical results
+across the two methods, but with many fewer observations vouchered
+observations. We only worked with species that had at least 1000
+records on GBIF within our focal time periods (1955--1980 and
+1985--2015). This pragmatic threshold limits us to better-studied
+species, but our results are robust to increases (\emph{e.g.}, 10,000
+observations) in this threshold. We only made use of data for which
+species identity was known, and we ignored variation among
+sub-species. The GBIF taxonomy is, itself, to some extent cleaned, and
+so we retained in our analysis any species within GBIF that was not
+present in another datasets (see
+\citeauthor{Cornwell2019}\supercite{Cornwell2019} for a discussion of
+the GBIF taxonomy for plants).
 
-\textbf{Climate data.} Climate data were downloaded from
+Climate data were downloaded from
 \citeauthor{Harris2014}\supercite{Harris2014}'s nine global
-time-series. We split the data into yearly (averaged) $0.5^\circ$
+time-series. We split the data into yearly (averaged) 0.5$^\circ$
 cells, from which we estimated each of our nine climate variables for
-each species observation.
-
-\textbf{Trait and phylogenetic data.} Plant trait data were taken from
+each species observation using
+\emph{raster}\supercite{Hijmans2019}. Plant trait data were taken from
 \citeauthor{Wright2004}\supercite{Wright2004} (leaf lifespan, leaf
 mass-per-unit-area, leaf Nitrogen mass, and leaf photosynthetic
 capacity), mammal body mass data from PanTHERIA\supercite{Jones2009a}
@@ -538,56 +587,36 @@ EltonTraits \supercite{Wilman2014}. We were unable to find sufficient
 coverage of the other taxa in this study in open-access trait
 databases to facilitate further analysis. We used existing global
 mammal\supercite{Faurby2015}, bird\supercite{Jetz2012}, amphibian
-\supercite{Jetz2018}, and plant\supercite{Smith2018} phylogenies,
-which contain posterior distributions of possible phylogenies which we
-used to account for uncertainty (see `Trait and phylogenetic analyses'
-below). For reptiles, we used
-\citeauthor{Zheng2016}\supercite{Zheng2016}, which is a single
-phylogeny and so we could not account for uncertainty with it in this
-way. We were unable to find dated, global phylogenies for the other
-taxa in this study.
-
-\textbf{Taxonomic cleaning.}  We only made use of data for which
-species identity was known, and we ignored variation among
-sub-species. Species' taxonomy has changed through time, and so is a
-potential source of bias in our analysis. As such, we used the World
-Conservation Union's species taxonomy, through
-\emph{taxize}\supercite{Chamberlain2013}, to harmonise all taxonomic
-information. In cases where a species' name could not be found on the
-IUCN, we retained that species in our analysis (since GBIF itself
-performs taxonomic cleaning and standardisation).
+\supercite{Jetz2018}, plant (`ALLOTB' phylogeny
+\supercite{Smith2018}), and reptiles\supercite{Zheng2016} phylogenies,
+and in cases where posterior distributions of trees were available we
+used a single draw from that distribution.
 
 \subsection*{Calculating and testing our track index}
 
-\textbf{Bootstrapping procedure to account for sampling bias and
-  empirical calculation of track index values.}  The sampling of
-species through time and across space is known to be uneven across the
-data in GBIF \supercite{Beck2013,Beck2014}. To ensure our method was
-statistically robust to such changes, we employed a bootstrap
-procedure during the calculation of $track_\tau$. To do this we
-randomly re-sampled, with replacement, the occurrences making up
-$present_\tau$ and $projected_\tau$ to be of the same number as
-$past_\tau$, and vice-versa for $past_\tau$ and $present_\tau$. We
-repeated this process 999 times, and report the median of the
-bootstrapped distribution of $track_\tau$ here in the main text. We
-applied this procedure to the occurrence data described above.
+The sampling of species through time and across space is known to be
+uneven across the data in GBIF \supercite{Beck2013,Beck2014}. To
+ensure our method was statistically robust to such changes, we
+employed a bootstrap procedure during the calculation of
+$track_\tau$. To do this we randomly re-sampled, with replacement, the
+occurrences making up $current_\tau$ and $projected_\tau$ to be of the
+same number as $past_\tau$, and vice-versa for $past_\tau$ and
+$current_\tau$. We repeated this process 999 times, and calculated a
+$track_\tau$ value for each re-sample, generating 999 $track_\tau$
+values whose medians we report here.
 
-\textbf{Estimating the track index in simulated data.} To assess the
-performance of our (bootstrapped) track index, we simulated species'
-whose ranges tracked climate to varying extents through time. Full
-results of the results of these simulations are given in the
-supplementary materials, and a selection of simulations are shown i
-figure \ref{violin}. Using the climate data from above in the years
-1962 and 2002 (the mid-points of the ranges of our data), we simulated
-species with varying maximum possible range sizes (1x1, 2x2, 5x5,
-10x10, 20x20, or 50x50 grid-cell extents) and varying possible
-latitudinal shifts in range ($\pm$1, 2, 5, or 10 grid-cells). We also
+To assess the performance of our (bootstrapped) track index, we
+simulated species' whose ranges tracked climate to varying extents
+through time. Using the climate data from above in the years 1962 and
+2002 (the mid-points of the ranges of our data), we simulated species
+with varying maximum possible range sizes (1x1, 2x2, 5x5, 10x10,
+20x20, or 50x50 grid-cell extents) and varying possible latitudinal
+shifts in range through time ($\pm$1, 2, 5, or 10 grid-cells). We also
 varied two other parameters: a species' degree of environmental
-tracking ($\alpha$; taking a value of 0, 0.1, 0.2, ..., 0.9, or 1) and
-overall fraction of chance occupancy ($\sigma$; taking a value of 0,
-0.1, 0.2, ..., 0.9, or 1). Together, these two parameters define a
-species' probability of being present within a cell within its
-potential range:
+tracking ($\alpha$; taking a value of 0, 0.5, or 1) and overall
+fraction of chance occupancy ($\sigma$; taking a value of 0.5, .75, or
+1). Together, these two parameters define a species' probability of
+being present within a cell within its potential range:
 $(1-\alpha) \times sigma + \alpha \times \mathcal{N}$.  $\mathcal{N}$
 is defined as a scaled Normal probability density function with a mean
 equal to the median of the species' distribution in 1962 and a
@@ -602,7 +631,7 @@ potential range shifts.
 \subsection*{Trait and phylogenetic analyses}
 
 We calculated the Pearson's correlation between all estimated climatic
-niche variables ($present_\tau$, $past_\tau$, $projected_\tau$,
+niche variables ($current_\tau$, $past_\tau$, $projected_\tau$,
 $track_\tau$ and the bootstrapped $track_\tau$). While we show only a
 handful of these correlations in figure \ref{traits}, we provide all
 correlations in the supplementary figures (and note that the
