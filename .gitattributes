@@ -1,0 +1,5 @@
+phylogenies/bird_tree.tre filter=lfs diff=lfs merge=lfs -text
+phylogenies/ALLOTB.tre filter=lfs diff=lfs merge=lfs -text
+phylogenies/amphibian_tree.tre filter=lfs diff=lfs merge=lfs -text
+phylogenies/squamate_tree.tre filter=lfs diff=lfs merge=lfs -text
+phylogenies/faurby_mammals.tre filter=lfs diff=lfs merge=lfs -text
