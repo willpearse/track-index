@@ -223,5 +223,6 @@ prog.bar <- function(x, y){
         data.frame(.simplify(insects, index, quantile, clean, abs), taxon="insects"),
         data.frame(.simplify(mammals, index, quantile, clean, abs), taxon="mammals"),
         data.frame(.simplify(reptiles, index, quantile, clean, abs), taxon="reptiles"),
+        data.frame(.simplify(amphibians, index, quantile, clean, abs), taxon="amphibians"),
         data.frame(.simplify(birds, index, quantile, clean, abs), taxon="birds")
     ))

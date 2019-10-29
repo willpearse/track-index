@@ -20,14 +20,19 @@ source("src/headers.R")
         apply(as.matrix(c.data$data), 1, function(x) which.min(abs(x))),
         rownames(c.data$data)
     )
-.phy.sig.wrap <- function(data, tree, index, clean, method="lambda", merge=TRUE){
+.phy.sig.wrap <- function(data, tree, index, clean, method="lambda", merge=TRUE, p.val=FALSE){
     output <- matrix(NA, ncol=9, nrow=5)
     rownames(output) <- dimnames(data)[[2]]
     colnames(output) <- dimnames(data)[[1]]
     
     for(i in seq_len(nrow(output))){
         c.data <- .make.comparative.data(.simplify(data, index, rownames(output)[i]), tree, merge)
-        output[i,] <- as.numeric(.phy.sig(c.data)[1,])
+        if(p.val){
+            output[i,] <- as.numeric(.phy.sig(c.data)[2,])
+        } else {
+            output[i,] <- as.numeric(.phy.sig(c.data)[1,])
+        }
+            
     }
     return(output)
 }
@@ -109,7 +114,8 @@ reptiles <- readRDS("clean-data/reptiles-index.RDS")
 birds <- readRDS("clean-data/birds-index.RDS")
 
 # Calculate signals
-saveRDS(list(
+if(FALSE){
+    saveRDS(list(
     bootstrap.index=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "bootstrap.index"),
     index=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "index"),
     present=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "present"),
@@ -145,6 +151,45 @@ saveRDS(list(
     past=.phy.sig.wrap(plants, read.tree("phylogenies/ALLOTB.tre"), "past"),
     projected=.phy.sig.wrap(plants, read.tree("phylogenies/ALLOTB.tre"), "projected")
 ), "clean-data/plants-signal.RDS")
+}
+
+# Get p-values
+saveRDS(list(
+    bootstrap.index=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "bootstrap.index"),
+    index=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "index"),
+    present=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "present"),
+    past=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "past"),
+    projected=.phy.sig.wrap(mammals, read.tree("phylogenies/faurby_mammals.tre"), "projected")
+), "clean-data/mammals-signal-p.RDS")
+saveRDS(list(
+    bootstrap.index=.phy.sig.wrap(birds, read.tree("phylogenies/bird_tree.tre"), "bootstrap.index"),
+    index=.phy.sig.wrap(birds, read.tree("phylogenies/bird_tree.tre"), "index"),
+    present=.phy.sig.wrap(birds, read.tree("phylogenies/bird_tree.tre"), "present"),
+    past=.phy.sig.wrap(birds, read.tree("phylogenies/bird_tree.tre"), "past"),
+    projected=.phy.sig.wrap(birds, read.tree("phylogenies/bird_tree.tre"), "projected")
+), "clean-data/birds-signal-p.RDS")
+saveRDS(list(
+    bootstrap.index=.phy.sig.wrap(reptiles, read.tree("phylogenies/squamate_tree.tre"), "bootstrap.index"),
+    index=.phy.sig.wrap(reptiles, read.tree("phylogenies/squamate_tree.tre"), "index"),
+    present=.phy.sig.wrap(reptiles, read.tree("phylogenies/squamate_tree.tre"), "present"),
+    past=.phy.sig.wrap(reptiles, read.tree("phylogenies/squamate_tree.tre"), "past"),
+    projected=.phy.sig.wrap(reptiles, read.tree("phylogenies/squamate_tree.tre"), "projected")
+), "clean-data/reptiles-signal-p.RDS")
+if(FALSE)
+    saveRDS(list(
+        bootstrap.index=.phy.sig.wrap(amphibians, read.tree("phylogenies/amphibian_tree.tre"), "bootstrap.index"),
+        index=.phy.sig.wrap(amphibians, read.tree("phylogenies/amphibian_tree.tre"), "index"),
+        present=.phy.sig.wrap(amphibians, read.tree("phylogenies/amphibian_tree.tre"), "present"),
+        past=.phy.sig.wrap(amphibians, read.tree("phylogenies/amphibian_tree.tre"), "past"),
+        projected=.phy.sig.wrap(amphibians, read.tree("phylogenies/amphibian_tree.tre"), "projected")
+    ), "clean-data/amphibians-signal-p.RDS")
+saveRDS(list(
+    bootstrap.index=.phy.sig.wrap(plants, read.tree("phylogenies/ALLOTB.tre"), "bootstrap.index"),
+    index=.phy.sig.wrap(plants, read.tree("phylogenies/ALLOTB.tre"), "index"),
+    present=.phy.sig.wrap(plants, read.tree("phylogenies/ALLOTB.tre"), "present"),
+    past=.phy.sig.wrap(plants, read.tree("phylogenies/ALLOTB.tre"), "past"),
+    projected=.phy.sig.wrap(plants, read.tree("phylogenies/ALLOTB.tre"), "projected")
+), "clean-data/plants-signal-p.RDS")
 
 # Estimate signal fractions
 comp <- matrix(

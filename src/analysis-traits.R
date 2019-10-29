@@ -14,9 +14,11 @@ source("src/headers.R")
 .combine.data <- function(index, quant, clean=10, abs=FALSE){
     data <- .simplify.group(index, quant, clean, abs)
     data$species <- rownames(data)
-
-    data$bm.neotoma <- neotoma$log.mass[match(data$species, neotoma$binomial)]
-    data$bm.elton <- elton.bm[data$species]
+    
+    data$bm.mamm <- neotoma$log.mass[match(data$species, neotoma$binomial)]
+    data$bm.mamm[data$taxon != "mammals"] <- NA
+    data$bm.bird <- elton.bm[data$species]
+    data$bm.bird[data$taxon != "birds"] <- NA
 
     data$log.ll <- glopnet$log.LL[match(data$species, glopnet$Species)]
     data$log.lma <- glopnet$log.LMA[match(data$species, glopnet$Species)]
@@ -28,19 +30,19 @@ source("src/headers.R")
     data <- .combine.data(index, quant, clean, abs)
 
     c.var <- setNames(
-        c("clouds","frost","evapo-trans.","precipitation","min(temp)","mean(temp)","max(temp)","vapour"),
-                      c("cld","frs","pet","pre","tmn","tmp","tmx","vap")
+        c("clouds","frost","evapo-trans.","precipitation","min(temp)","mean(temp)","max(temp)","vapour","rainy day"),
+        c("cld","frs","pet","pre","tmn","tmp","tmx","vap","wet")
     )
     q.var <- setNames(
         c("5th","25th","50th","75th","95th"),
         c("0.05","0.25","0.5","0.75","0.95")
     )[quant]
     t.var <- setNames(
-        c("body-mass","body-mass","leaf lifespan","leaf mass/area","leaf N","photosynth"),
-        c("bm.neotoma","bm.elton","log.ll","log.lma","log.Nmass","log.Amass")
+        c("mammal mass","bird mass","leaf lifespan","leaf mass/area","leaf N","photosynth"),
+        c("bm.mamm","bm.bird","log.ll","log.lma","log.Nmass","log.Amass")
     )
     
-    mat <- matrix(nrow=6, ncol=8, dimnames=list(t.var, c.var))
+    mat <- matrix(nrow=length(t.var), ncol=length(c.var), dimnames=list(t.var, c.var))
     for(i in seq_along(c.var)){
         for(j in seq_along(t.var)){
             if(p.val){
@@ -58,7 +60,7 @@ source("src/headers.R")
     signif <- index.mat.p < .05
     index.mat.p <- matrix(0, nrow=nrow(index.mat), ncol=ncol(index.mat))
     index.mat.p[signif] <- 1
-    comparison.mat <- t(.corr.mat(comparison, quant))
+    comparison.mat <- t(.corr.mat(comparison, quant, clean=NA))
     cols <- colorRampPalette(c("red", "white", "blue"))
                    
     comparison.cuts <- as.numeric(cut(as.numeric(comparison.mat), breaks=seq(-1,1,length.out=201)))
@@ -84,6 +86,7 @@ insects <- readRDS("clean-data/insects-index.RDS")
 mammals <- readRDS("clean-data/mammals-index.RDS")
 reptiles <- readRDS("clean-data/reptiles-index.RDS")
 birds <- readRDS("clean-data/birds-index.RDS")
+amphibians <- readRDS("clean-data/amphibians-index.RDS")
 combined <- .simplify.group("bootstrap.index", "0.5", clean=10)
 
 # Load Neotoma data
@@ -106,12 +109,11 @@ elton.bm <- setNames(c(elton.mam$BodyMass.Value, elton.birds$BodyMass.Value), c(
 elton.bm <- log10(elton.bm)
 
 # Combine
-pdf("figures/traits-05.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.05", 5); dev.off()
+pdf("figures/traits-05.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.05", clean=5); dev.off()
 pdf("figures/traits-25.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.25", 5); dev.off()
 pdf("figures/traits-50.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.5", 5); dev.off()
 pdf("figures/traits-75.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.75", 5); dev.off()
 pdf("figures/traits-95.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.95", 5); dev.off()
-corrplot(matrix(1:25, 5), p.mat=matrix(rep(0:1,length.out=25),5), is.corr=FALSE)
 
 # Correlations
 

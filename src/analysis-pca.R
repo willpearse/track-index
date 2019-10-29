@@ -36,6 +36,7 @@ insects <- readRDS("clean-data/insects-index.RDS")
 mammals <- readRDS("clean-data/mammals-index.RDS")
 reptiles <- readRDS("clean-data/reptiles-index.RDS")
 birds <- readRDS("clean-data/birds-index.RDS")
+amphibians <- readRDS("clean-data/amphibians-index.RDS")
 
 # PCAs
 for(quant in c("0.05","0.25","0.5","0.75","0.95")){

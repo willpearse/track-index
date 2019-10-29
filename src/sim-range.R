@@ -15,36 +15,40 @@ temp <- readRDS("clean-data/cru-tmp.RDS")
     !(any(dist < 0) | any(dist[,1] > nrow(raster)) | any(dist[,2] > ncol(raster)))
 .get.niche <- function(dist, raster)
     median(raster[dist], na.rm=TRUE)
-.prob.occur <- function(dist, raster, alpha, sd, optimum){
+.prob.occur <- function(dist, raster, alpha, sd, optimum, sigma){
     env <- raster[dist]
     niche <- dnorm(env, optimum, sd) / dnorm(optimum, optimum, sd)
-    niche <- (1-alpha) + niche*alpha
+    niche <- ((1-alpha)*sigma) + (niche*alpha)
     present <- dist[runif(length(env)) <= niche,]
     return(present)
 }
-.dist.wrap <- function(x, y, range, raster, alpha, sd, optimum){
+.dist.wrap <- function(x, y, range, raster, alpha, sd, optimum, sigma){
     block <- .make.block.dist(x, y, range, raster)
-    return(.prob.occur(block, raster, alpha, sd, optimum))
+    return(.prob.occur(block, raster, alpha, sd, optimum, sigma))
 }
 .do.calc <- function(i){
-    # Make distributions
-    # THIS IS THE ONE
-    optimum <- .get.niche(.make.block.dist(data$x[i], data$y[i], data$range[i], temp), early)
-    early.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], early, data$alpha[i], 1, optimum)
-    mid.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], mid, data$alpha[i], 1, optimum)
-    late.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], late, data$alpha[i], 1, optimum)
-    # Calculate index
-    mid.index <- .calc.metric(as.numeric(mid[mid.dist]), as.numeric(early[early.dist]), as.numeric(mid[early.dist]), quantile=.5, n.boot=99)
-    late.index <- .calc.metric(as.numeric(late[late.dist]), as.numeric(early[early.dist]), as.numeric(late[early.dist]), quantile=.5, n.boot=99)
+    locker <- FALSE
+    tryCatch({
+        # Make distributions
+        optimum <- .get.niche(.make.block.dist(data$x[i], data$y[i], data$range[i], temp), early)
+        early.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], early, data$alpha[i], 1, optimum, data$sigma[i])
+        mid.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], mid, data$alpha[i], 1, optimum, data$sigma[i])
+        late.dist <- .dist.wrap(data$x[i], data$y[i], data$range[i], late, data$alpha[i], 1, optimum, data$sigma[i])
+        # Calculate index
+        mid.index <- .calc.metric(as.numeric(mid[mid.dist]), as.numeric(early[early.dist]), as.numeric(mid[early.dist]), quantile=.5, n.boot=99)
+        late.index <- .calc.metric(as.numeric(late[late.dist]), as.numeric(early[early.dist]), as.numeric(late[early.dist]), quantile=.5, n.boot=99)
+        locker <- TRUE
+    }, error=function(x) "got a species with no distribution")
+    
     # Check for successful completion and return
-    if(is.null(mid.index) | is.null(late.index))
+    if((!locker) || is.null(mid.index) || is.null(late.index))
         return(matrix(NA, 2, 7, dimnames=list(c("mid","late"), c("index","bootstrap.index", "mad.index", "quantile","present","past","projected"))))
     return(matrix(c(mid.index,late.index), 2, 7, dimnames=list(c("mid","late"), c("index","bootstrap.index", "mad.index", "quantile","present","past","projected")), byrow=TRUE))
-}
+}    
 
 # Prepare pre- and post- data
-early <- as.matrix(temp[[1]])
-mid <- as.matrix(temp[[50]])
+early <- as.matrix(temp[[62]])
+mid <- as.matrix(temp[[102]])
 late <- as.matrix(temp[[100]])
 
 # Select viable starting distributions
@@ -56,9 +60,7 @@ for(i in seq_along(viable))
 centers <- centers[viable,]
 
 # Add parameters for simulations
-species <- expand.grid(shift=seq(-2,2), range=c(1,2,5), alpha=0, merge=paste(centers[,1], centers[,1], sep="-"))
-species <- rbind(species,
-                 expand.grid(shift=seq(-2,2), range=c(5,10,20,50), alpha=c(0,.5,1), merge=paste(centers[,1], centers[,1], sep="-")))
+species <- expand.grid(shift=c(-4,-2,0,2,4), range=c(2,5,10,20), alpha=c(0,.5,1), merge=paste(centers[,1], centers[,1], sep="-"), sigma=c(.5,.75,1))
 centers <- data.frame(x=centers[,1], y=centers[,2], merge=paste(centers[,1], centers[,1], sep="-"))
 data <- merge(species, centers, by="merge")
 
@@ -66,6 +68,8 @@ data <- merge(species, centers, by="merge")
 results <- mcMap(.do.calc, seq_len(nrow(data)))
 save.image("sim-range.RData")
 
+
+if(FALSE){
 # Merge data
 mid <- t(sapply(results, function(x) x[1,]))
 data <- cbind(data, mid)
@@ -152,3 +156,4 @@ par(mfcol=c(3,1))
 dev.off()
 
 with(data, summary(lm(index ~ outcome -1)))
+}
