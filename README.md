@@ -19,7 +19,8 @@ Mandatory steps to re-run our analysis:
 2. Open `src/download-cru.rb` and modify line 5 to match the directory specified in step 1.
 3. Open `src/download-gbif.rb` and modify line 6 to match the directory specified in step 1.
 4. Install all necessary R package by running something like `Rscript src/headers.R`. Check for errors and correct as necessary!
-5. Ensure `ruby`, `get`, `unzip`, `cut`, and (if you want the manuscript itself)`pdflatex` and `biber` are installed on your machine.
-6. You probably need to be on a Linux machine; MacOS will probably work if (6) is caried out; Windows likely won't.
-7. Run everything by typing `ruby Rakefile`
-8. Wait a very long time - potentially several days.
+5. Open the file `raw-data/metadata.txt` and got to the URLs inside to dwonload the trait data and save it under the filenames listed inside the meta-data file. The licensing restrictions of (some) of these datasets mean I cannot redistribute them in this repostiory.
+6. Ensure `ruby`, `get`, `unzip`, `cut`, and (if you want the manuscript itself)`pdflatex` and `biber` are installed on your machine.
+7. You probably need to be on a Linux machine; MacOS will probably work if (6) is caried out; Windows likely won't.
+8. Run everything by typing `ruby Rakefile`
+9. Wait a very long time - potentially several days.
