@@ -59,6 +59,22 @@ options(mc.cores=24)
 if(options("mc.cores")==24)
     warning("Assuming you have 24 cores on your computer: if not, change `headers.R`")
 
+data.options <- as.data.frame(expand.grid(
+    min.records=c(500, 1000, 10000),
+    clean.binomial=c(TRUE,FALSE),
+    spatial.issues=c(TRUE,FALSE),
+    binary=c(TRUE, FALSE)
+))
+data.options$output.dir <- with(data.options,
+                                paste0("clean-data/",
+                                       paste(
+                                           ifelse(clean.binomial, "clnbin", "rawbin"),
+                                           ifelse(spatial.issues, "clnspc", "rawspc"),
+                                           min.records,
+                                           binary,
+                                           sep="-"
+                                       )), "/")
+
 ####################################
 # Functions ########################
 ####################################

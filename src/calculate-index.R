@@ -1,66 +1,114 @@
 # Headers
 source("src/headers.R")
 
-# Wrapper functions
-.calc.track.parallel <- function(data, quantiles, rasters, taxon){
-    .int.calc <- function(sp){
-        # Setup and subset data
-        curr.data <- data[scientificname == sp,]
-        post.data <- curr.data[year %in% 1990:2015,]
-        pre.data <- curr.data[year %in% 1955:1980,]
-        post.years <- unique(post.data$year)
-        output <- array(
-            dim=c(length(rasters), length(quantiles), 7),
-            dimnames=list(names(rasters), as.character(quantiles), c("index","bootstrap.index", "mad.index", "quantile","present","past","projected"))
-        )
-        if(nrow(pre.data) == 0 | nrow(post.data) == 0)
-            return(FALSE)        
-        
-        # Loop over rasters
-        for(i in seq_along(rasters)){
-            # Prepare to store data
-            post.data$env <- -999
-            pre.data$pre.env <- -999
-            pre.data$post.env <- -999
-            pre.years <- unique(pre.data$year)
-
-            # Match climate data (in chunks to save memory and for speed)
-            for(k in seq_along(post.years))
-                post.data[year==post.years[k],]$env <- extract(rasters[[i]][[post.data$year[k]-1900]], post.data[year==post.years[k],.(decimallongitude,decimallatitude)])
-            for(k in seq_along(pre.years)){
-                pre.data[year==pre.years[k],]$pre.env <- extract(rasters[[i]][[pre.data$year[k]-1900]], pre.data[year==pre.years[k],.(decimallongitude,decimallatitude)])
-                pre.data[year==pre.years[k],]$post.env <- extract(rasters[[i]][[pre.data$year[k]-1900+25]], pre.data[year==pre.years[k],.(decimallongitude,decimallatitude)])
-            }
-
-            # Do work
-            output[i,,] <- t(sapply(quantiles, function(x) .calc.metric(pre.data$pre.env, post.data$env, pre.data$post.env, x)))
+# Link past and present distributions with past and present climate
+map.climate <- function(gbif.data, env, pres.years, past.years, yr.diff, binary){
+    .get <- function(...){
+        if(binary){
+            cells <- mask(env, rasterize(points, env, fun="first"))@data@values
+            return(cells[!is.na(cells)])
         }
+        points <- extract(env, gbif.data[,.(decimallongitude,decimallatitude)])@data@values
+        return(points[!is.na(points)])
+    }
+    # Pre-allocate
+    pres.dis.pres.env <- pres.dis.past.env <- vector("list", length(pres.years)) 
+    past.dis.pres.env <- past.dis.past.env <- vector("list", length(past.years))
 
-        saveRDS(output, paste0(output.dir,taxon,"/",sp,".RDS"))
-        return(TRUE)
+    # Extract
+    for(i in seq_along(pres.years)){
+        pres.dis.pres.env[[i]] <- .get(gbif.data[year==pres.years[i]], env[[pres.years[i]-1900]])
+        pres.dis.past.env[[i]] <- .get(gbif.data[year==pres.years[i]], env[[pres.years[i]-1900-yr.diff]])
+    }
+        
+    for(i in seq_along(past.years)){
+        past.dis.pres.env[[i]] <- .get(gbif.data[year==past.years[i]], env[[past.years[i]-1900+yr.diff]])
+        past.dis.past.env[[i]] <- .get(gbif.data[year==past.years[i]], env[[past.years[i]-1900]])
     }
     
-    mcMap(.int.calc, unique(data$scientificname))
-    return(TRUE)
-}
-.merge.results <- function(taxon){
-    files <- list.files(paste0(output.dir,taxon))
-    results <- Map(function(x) readRDS(paste0(output.dir,taxon,"/",x)), files)
-    names(results) <- gsub(".RDS", "", names(results), fixed=TRUE)
-    return(abind(results, along=4))
+    # Reformat and return
+    return(list(
+        pres.dis.pres.env=unlist(pres.dis.pres.env), pres.dis.past.env=unlist(pres.dis.past.env),
+        past.dis.pres.env=unlist(past.dis.pres.env), past.dis.past.env=unlist(past.dis.past.env)
+    ))
 }
 
-# Load and clean GBIF data
-plants <- .load.gbif(
-    obs=paste0(gbif.dir,"plantae/0001849-180131172636756_abbreviated.txt")#,
-    #specimens=paste0(gbif.dir,"plantae/0001851-180131172636756_abbreviated.txt")
-, min.records=1000, clean.binomial=TRUE)
-mammals <- .load.gbif(obs=paste0(gbif.dir,"mammalia/0000171-180412121330197_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
-amphibians <- .load.gbif(obs=paste0(gbif.dir,"amphibia/0034734-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
-fungi <- .load.gbif(obs=paste0(gbif.dir,"asco-basidio/0034724-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
-birds <- .load.gbif(obs=paste0(gbif.dir,"aves/0000172-180412121330197_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
-insects <- .load.gbif(obs=paste0(gbif.dir,"insecta/0034726-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
-reptiles <- .load.gbif(obs=paste0(gbif.dir,"reptillia/0034728-180508205500799_abbreviated.txt"), min.records=1000, clean.binomial=TRUE)
+# Calculate index
+calc.metric <- function(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env, quantile=.5, n.boot=999){
+    # Calculate observed quantiles and indices
+    quants <- sapply(list(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env), quantile, probs=quantile, na.rm=TRUE)
+    track.index <- (quants["pres.dis.pres.env"]-quants["past.dis.past.env"]) / (quants["past.dis.pres.env"]-quants["past.dis.past.env"])
+    null.index <- (quants["pres.dis.pres.env"]-quants["pres.dis.past.env"]) / (quants["past.dis.pres.env"]-quants["past.dis.past.env"])
+
+    # Bootstrap resampling
+    .bootstrap <- function(x, n, n.boot, quantile){
+        x <- replicate(n.boot, sample(x, n, replace=TRUE), simplify=FALSE)
+        return(sapply(x, quantile, probs=quantile, na.rm=TRUE))
+    }
+    b.pres.dis.pres.env <- .bootstrap(pres.dis.pres.env, length(past.dis.past.env), n.boot, quantile)
+    b.pres.dis.past.env <- .bootstrap(pres.dis.past.env, length(past.dis.past.env), n.boot, quantile)
+    b.past.dis.pres.env <- .bootstrap(past.dis.pres.env, length(pres.dis.pres.env), n.boot, quantile)
+    b.past.dis.past.env <- .bootstrap(past.dis.past.env, length(pres.dis.pres.env), n.boot, quantile)
+
+    # Calculate bootstrapped indices and summaries
+    b.track.index <- (b.pres.dis.pres.env-b.past.dis.past.env) / (b.past.dis.pres.env-b.past.dis.past.env)
+    mad.track.index <- mad(b.track.index)
+    b.track.index <- median(b.track.index)
+    b.null.index <- (b.pres.dis.pres.env-b.past.dis.past.env) / (b.pres.dis.pres.env-b.past.dis.past.env)
+    mad.null.index <- mad(b.null.index)
+    b.null.index <- median(b.null.index)
+    
+    # Format and return
+    return(c(
+        track.index=track.index, b.track.index=b.track.index, mad.track.index=mad.track.index,
+        null.index=null.index, b.null.index=b.null.index, mad.null.index=mad.null.index,
+        pres.dis.pres.env=quants["pres.dis.pres.env"], pres.dis.past.env=quants["pres.dis.past.env"], past.dis.pres.env=quants["past.dis.pres.env"], past.dis.past.env=quants["past.dis.past.env"]
+    ))
+}
+
+# Main worker for observed and null data
+calc.metric.parallel <- function(data, quantiles, rasters, taxon, output.dir, binary, null=c("obs","shift","niche","sampling")){
+    .int.calc <- function(sp, binary){
+        # Setup and subset data
+        curr.data <- data[scientificname == sp,]
+        output <- array(
+            dim=c(2, length(rasters), length(quantiles), 7),
+            dimnames=list(c("observed","spp.year.shuffle")names(rasters), as.character(quantiles), c(track.index, b.track.index, mad.track.index, null.index, b.null.index, mad.null.index, pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env))
+        )
+        
+        # Do work per raster
+        for(i in seq_along(rasters)){
+            t <- map.climate(curr.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
+            output[1,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))
+            curr.data$year <- sample(curr.data$year)
+            t <-.map.climate(curr.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
+            output[2,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))
+        }
+        return(output)
+    }
+    
+    return(mcMap(.int.calc, unique(data$scientificname, binary=binary)))
+}
+
+do.work <- function(i){
+    .taxon <- function(file, taxon){
+        gbif <- .load.gbif(obs=paste0(gbif.dir,file), min.records=opts["min.records"], clean.binomial=opts["clean.binomial"], clean.gbif=opts["clean.gbif"])
+        saveRDS(
+            .calc.track.parallel(gbif, quantiles, cru, taxon, opts["output.dir"], binary=opts["binary"]),
+            paste0(opts["output.dir"],paste0(taxon,"-index.RDS"))
+        )
+    }
+
+    opts <- data.options[i,]
+    .taxon("amphibia/0011411-200221144449610_abbreviated.txt", "amphibians")
+    .taxon("asco-basidio/0011412-200221144449610_abbreviated.txt", "fungi")
+    .taxon("aves/0011413-200221144449610_abbreviated.txt", "birds")
+    .taxon("insecta/0012312-200221144449610_abbreviated.txt", "insects")
+    .taxon("mammalia/0012314-200221144449610_abbreviated.txt", "mammals")
+    .taxon("plantae/0012316-200221144449610_abbreviated.txt", "plants")
+    .taxon("reptillia/0012360-200221144449610_abbreviated.txt", "reptiles")
+}
+
 
 # Load climate rasters
 cru <- list(
@@ -74,28 +122,7 @@ cru <- list(
     vap=readRDS(paste0(output.dir,"cru-vap.RDS")),
     wet=readRDS(paste0(output.dir,"cru-wet.RDS"))
 )    
-    
-# Do work and save results
-print("mammals")
-.calc.track.parallel(mammals, quantiles, cru, "mammals")
-print("amphibians")
-.calc.track.parallel(amphibians, quantiles, cru, "amphibians")
-print("fungi")
-.calc.track.parallel(fungi, quantiles, cru, "fungi")
-print("insects")
-.calc.track.parallel(insects, quantiles, cru, "insects")
-print("reptiles")
-.calc.track.parallel(reptiles, quantiles, cru, "reptiles")
-print("plants")
-.calc.track.parallel(plants, quantiles, cru, "plants")
-print("birds")
-.calc.track.parallel(birds, quantiles, cru, "birds")
 
-# Merge the results back together again
-saveRDS(.merge.results("mammals"), paste0(output.dir,"mammals-index.RDS"))
-saveRDS(.merge.results("amphibians"), paste0(output.dir,"amphibians-index.RDS"))
-saveRDS(.merge.results("fungi"), paste0(output.dir,"fungi-index.RDS"))
-saveRDS(.merge.results("insects"), paste0(output.dir,"insects-index.RDS"))
-saveRDS(.merge.results("reptiles"), paste0(output.dir,"reptiles-index.RDS"))
-saveRDS(.merge.results("plants"), paste0(output.dir,"plants-index.RDS"))
-saveRDS(.merge.results("birds"), paste0(output.dir,"birds-index.RDS"))
+# Do work across all data formatting types
+for(i in seq_len(nrow(data.options)))
+    do.work(i)
