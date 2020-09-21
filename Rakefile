@@ -14,12 +14,12 @@ end
 
 desc "Download and process GBIF data"
 task :gbif do
-  `ruby download_gbif.rb`
+  `ruby src/download_gbif.rb`
 end
 
 desc "Download and process CRU data"
 task :cru do
-  `ruby download_cru.rb`
+  `ruby src/download_cru.rb`
   `Rscript src/process-cru.R`
 end
 
