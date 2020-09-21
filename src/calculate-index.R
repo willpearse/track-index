@@ -3,12 +3,14 @@ source("src/headers.R")
 
 # Link past and present distributions with past and present climate
 map.climate <- function(gbif.data, env, pres.years, past.years, yr.diff, binary){
-    .get <- function(...){
+    .get <- function(d, e){
+        if(nrow(d)==0)
+            return(numeric(0))
         if(binary){
-            cells <- mask(env, rasterize(points, env, fun="first"))@data@values
+            cells <- mask(e, rasterize(d[,.(decimalLongitude,decimalLatitude)], e, fun="first"))@data@values
             return(cells[!is.na(cells)])
         }
-        points <- extract(env, gbif.data[,.(decimallongitude,decimallatitude)])@data@values
+        points <- extract(e, d[,.(decimalLongitude,decimalLatitude)])
         return(points[!is.na(points)])
     }
     # Pre-allocate
@@ -35,6 +37,14 @@ map.climate <- function(gbif.data, env, pres.years, past.years, yr.diff, binary)
 
 # Calculate index
 calc.metric <- function(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env, quantile=.5, n.boot=999){
+    if(length(pres.dis.pres.env)==0 | length(pres.dis.past.env)==0 | length(past.dis.pres.env)==0 | length(past.dis.past.env)==0){
+        return(c(
+            track.index=NA, b.track.index=NA, mad.track.index=NA,
+            null.index=NA, b.null.index=NA, mad.null.index=NA,
+            pres.dis.pres.env=NA, pres.dis.past.env=NA, past.dis.pres.env=NA, past.dis.past.env=NA
+        ))
+    }
+    
     # Calculate observed quantiles and indices
     quants <- sapply(list(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env), quantile, probs=quantile, na.rm=TRUE)
     track.index <- (quants["pres.dis.pres.env"]-quants["past.dis.past.env"]) / (quants["past.dis.pres.env"]-quants["past.dis.past.env"])
@@ -67,38 +77,38 @@ calc.metric <- function(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env,
 }
 
 # Main worker for observed and null data
-calc.metric.parallel <- function(data, quantiles, rasters, taxon, output.dir, binary, null=c("obs","shift","niche","sampling")){
+calc.metric.parallel <- function(data, quantiles, rasters, taxon, output.dir, binary){
     .int.calc <- function(sp, binary){
         # Setup and subset data
-        curr.data <- data[scientificname == sp,]
+        curr.data <- data[scientificName == sp,]
         output <- array(
-            dim=c(2, length(rasters), length(quantiles), 7),
-            dimnames=list(c("observed","spp.year.shuffle")names(rasters), as.character(quantiles), c(track.index, b.track.index, mad.track.index, null.index, b.null.index, mad.null.index, pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env))
+            dim=c(2, length(rasters), length(quantiles), 10),
+            dimnames=list(c("observed","spp.year.shuffle"), names(rasters), as.character(quantiles), c("track.index", "b.track.index", "mad.track.index", "null.index", "b.null.index", "mad.null.index", "pres.dis.pres.env", "pres.dis.past.env", "past.dis.pres.env", "past.dis.past.env"))
         )
         
         # Do work per raster
         for(i in seq_along(rasters)){
             t <- map.climate(curr.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
-            output[1,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))
+            output[1,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))            
             curr.data$year <- sample(curr.data$year)
-            t <-.map.climate(curr.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
+            t <- map.climate(curr.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
             output[2,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))
         }
         return(output)
     }
-    
-    return(mcMap(.int.calc, unique(data$scientificname, binary=binary)))
+    .int.calc(data$scientificName[1], TRUE)
+    #return(mcMap(.int.calc, unique(data$scientificName), binary=binary))
 }
 
 do.work <- function(i){
     .taxon <- function(file, taxon){
-        gbif <- .load.gbif(obs=paste0(gbif.dir,file), min.records=opts["min.records"], clean.binomial=opts["clean.binomial"], clean.gbif=opts["clean.gbif"])
+        gbif <- .load.gbif(obs=paste0(gbif.dir,file), min.records=unlist(opts["min.records"]), clean.binomial=unlist(opts["clean.binomial"]), clean.spatial=unlist(opts["clean.spatial"]))
         saveRDS(
-            .calc.track.parallel(gbif, quantiles, cru, taxon, opts["output.dir"], binary=opts["binary"]),
-            paste0(opts["output.dir"],paste0(taxon,"-index.RDS"))
+            calc.metric.parallel(gbif, quantiles, cru, taxon, unlist(opts["output.dir"]), binary=unlist(opts["binary"])),
+            paste0(unlist(opts["output.dir"]),paste0(taxon,"-index.RDS"))
         )
     }
-
+    
     opts <- data.options[i,]
     .taxon("amphibia/0011411-200221144449610_abbreviated.txt", "amphibians")
     .taxon("asco-basidio/0011412-200221144449610_abbreviated.txt", "fungi")

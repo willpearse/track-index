@@ -1,31 +1,49 @@
-puts "Installing R dependencies (if necessary)"
-`Rscript src/headers.R`
+task :default => [:before, :setup, :gbif, :cru, :calc_index, :figures, :ms, :after]
 
-puts "Downloading and processing GBIF data"
-`ruby download_gbif.rb`
+task :before do
+  puts "Running entire analysis from Pearse & Davies (2020)"
+  puts "... run `rake --tasks` to see how to run sub-components"
+  puts "... open `src/headers.R` to set # of cores for analysis (default 24!)"
+end
 
-puts "Downloading CRU data"
-`ruby download_cru.rb`
 
-puts "Processing CRU data"
-`Rscript src/process-cru.R`
+desc "Install missing R packages"
+task :setup do
+  `Rscript src/headers.R`
+end
 
-puts "Calculating index"
-`Rscript src/calculate-index.R`
+desc "Download and process GBIF data"
+task :gbif do
+  `ruby download_gbif.rb`
+end
 
-puts "Running simulations"
-`Rscript src/sims-range.R`
+desc "Download and process CRU data"
+task :cru do
+  `ruby download_cru.rb`
+  `Rscript src/process-cru.R`
+end
 
-puts "Generating figures"
-`Rscript src/analysis-violin.R`
-`Rscript src/analysis-pca.R`
-`Rscript src/analysis-phylo.R`
-`Rscript src/analysis-traits.R`
+desc "Calculating index"
+task :calc_index do
+  `Rscript src/calculate-index.R`
+end
 
-puts "Building manuscript"
-`pdflatex ms/ms.tex`
-`pdflatex ms/ms.tex`
-`biber ms/ms`
-`pdflatex ms/ms.tex`
+desc "Generating figures"
+task :figures do
+  `Rscript src/analysis-violin.R`
+  `Rscript src/analysis-pca.R`
+  `Rscript src/analysis-phylo.R`
+  `Rscript src/analysis-traits.R`
+end
 
-puts "Finished!"
+desc "Building manuscript"
+task :ms do 
+  `pdflatex ms/ms.tex`
+  `pdflatex ms/ms.tex`
+  `biber ms/ms`
+  `pdflatex ms/ms.tex`
+end
+
+task :after do
+  puts "... finished!"
+end

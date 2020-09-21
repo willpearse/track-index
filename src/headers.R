@@ -60,16 +60,17 @@ if(options("mc.cores")==24)
     warning("Assuming you have 24 cores on your computer: if not, change `headers.R`")
 
 data.options <- as.data.frame(expand.grid(
-    min.records=c(500, 1000, 10000),
+    min.records=c(500, 1000),
     clean.binomial=c(TRUE,FALSE),
-    spatial.issues=c(TRUE,FALSE),
+    clean.spatial=c(TRUE,FALSE),
     binary=c(TRUE, FALSE)
 ))
+
 data.options$output.dir <- with(data.options,
                                 paste0("clean-data/",
                                        paste(
                                            ifelse(clean.binomial, "clnbin", "rawbin"),
-                                           ifelse(spatial.issues, "clnspc", "rawspc"),
+                                           ifelse(clean.spatial, "clnspc", "rawspc"),
                                            min.records,
                                            binary,
                                            sep="-"
@@ -86,10 +87,9 @@ prog.bar <- function(x, y){
                 tryCatch(if(z[1] < 1) if((length(z) %% 10)==0) cat("|") else cat("."), error=function(z) cat("."))
         }
 }    
-.load.gbif <- function(obs, specimens, min.records=2000, clean.binomial=FALSE, clean.gbif=FALSE){
-    data <- data.table(scientificname="", decimallatitude=0.0, decimallongitude=0.0, year=0, type="")
-    if(clean.gbif)
-        data$issue <- ""
+.load.gbif <- function(obs, specimens, min.records=2000, clean.binomial=FALSE, clean.spatial=FALSE){
+    data <- data.table(scientificName="", decimalLatitude=0.0, decimalLongitude=0.0, year=0, type="")
+    data$issue <- ""
     if(!missing(obs)){
         tmp <- fread(obs)
         tmp$type <- "observations"
@@ -104,57 +104,23 @@ prog.bar <- function(x, y){
         stop("Must supply *some* data to load!...")
     data <- data[-1,]
 
-    if(clean.gbif)
+    if(clean.spatial)
         data <- data[issue == "",]
     
     if(clean.binomial){
-        spp <- unique(data$scientificname)
+        spp <- unique(data$scientificName)
         spp <- setNames(tolower(sapply(strsplit(spp, " "), function(x) paste(x[1:2], collapse="_"))), spp)
-        data$scientificname <- spp[data$scientificname]
+        data$scientificName <- spp[data$scientificName]
     }
 
     # Find most common species and subset
-    spp.table <- sort(table(data$scientificname), TRUE)
+    spp.table <- sort(table(data$scientificName), TRUE)
     spp.table <- names(spp.table)[spp.table >= min.records]
-    data <- data[scientificname %in% spp.table,]
+    data <- data[scientificName %in% spp.table,]
 
     # Subset by year
     data <- data[year > 1955 & year <= 2015,]
     return(data)
-}
-.calc.track <- function(i){
-    name <- paste0("taxon_", i, "_results.RDS")
-    data <- wrap.list[[i]]
-    quantiles <- seq(.1,.9,.05)
-    results <- array(dim=c(length(unique(data$scientificname)),ncol=14,length(quantiles)), dimnames=list(unique(data$scientificname), c("index","rank.pres","rank.past"), quantiles))
-    for(i in seq_len(nrow(results))){
-        # Pre-allocation and calculation
-        curr.data <- data[scientificname == rownames(results)[i],]
-        post.data <- curr.data[year %in% 1990:2015,]
-        pre.data <- curr.data[year %in% 1955:1980,]
-        post.years <- unique(post.data$year)
-        post.data$env <- -999
-        for(k in seq_along(post.years))
-            post.data[year==post.years[k],]$env <- extract(temp[[post.data$year[k]-1900]], post.data[year==post.years[k],.(decimallongitude,decimallatitude)])
-
-        # Chuck out if potential sampling problems
-        if(nrow(pre.data) == 0 | nrow(post.data) == 0)
-            next
-        
-        # Past and projected data extraction
-        pre.data$pre.env <- -999
-        pre.data$post.env <- -999
-        pre.years <- unique(pre.data$year)
-        for(k in seq_along(pre.years)){
-            pre.data[year==pre.years[k],]$pre.env <- extract(temp[[pre.data$year[k]-1900]], pre.data[year==pre.years[k],.(decimallongitude,decimallatitude)])
-            pre.data[year==pre.years[k],]$post.env <- extract(temp[[pre.data$year[k]-1900+25]], pre.data[year==pre.years[k],.(decimallongitude,decimallatitude)])
-        }
-
-        # Calculate for all quantiles
-        results[i,,] <- sapply(quantiles, function(x) .calc.metric(pre.data$pre.env, post.data$env, pre.data$post.env, x))
-    }
-    saveRDS(results, name)
-    return(results)
 }
 .calc.metric <- function(present, past, projected, quantile=.5, n.boot=999){
     # Calculate observed quantiles
