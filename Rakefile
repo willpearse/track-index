@@ -1,4 +1,4 @@
-task :default => [:before, :setup, :gbif, :cru, :calc_index, :figures, :ms, :after]
+task :default => [:before, :setup, :gbif, :cru_dwn, :cru_process, :calc_index, :figures, :ms, :after]
 
 task :before do
   puts "Running entire analysis from Pearse & Davies (2020)"
@@ -14,14 +14,19 @@ end
 
 desc "Download and process GBIF data"
 task :gbif do
-  `ruby src/download_gbif.rb`
+  `ruby src/download-gbif.rb`
 end
 
-desc "Download and process CRU data"
-task :cru do
-  `ruby src/download_cru.rb`
+desc "Download CRU data"
+task :cru_dwn do
+  `ruby src/download-cru.rb`
+end
+
+desc "Process CRU data"
+task :cru_process do
   `Rscript src/process-cru.R`
 end
+
 
 desc "Calculating index"
 task :calc_index do

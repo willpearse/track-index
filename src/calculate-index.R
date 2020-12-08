@@ -46,7 +46,7 @@ calc.metric <- function(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env,
     }
     
     # Calculate observed quantiles and indices
-    quants <- sapply(list(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env), quantile, probs=quantile, na.rm=TRUE)
+    quants <- setNames(sapply(list(pres.dis.pres.env, pres.dis.past.env, past.dis.pres.env, past.dis.past.env), quantile, probs=quantile, na.rm=TRUE), c("pres.dis.pres.env", "pres.dis.past.env", "past.dis.pres.env", "past.dis.past.env"))
     track.index <- (quants["pres.dis.pres.env"]-quants["past.dis.past.env"]) / (quants["past.dis.pres.env"]-quants["past.dis.past.env"])
     null.index <- (quants["pres.dis.pres.env"]-quants["pres.dis.past.env"]) / (quants["past.dis.pres.env"]-quants["past.dis.past.env"])
 
@@ -89,15 +89,14 @@ calc.metric.parallel <- function(data, quantiles, rasters, taxon, output.dir, bi
         # Do work per raster
         for(i in seq_along(rasters)){
             t <- map.climate(curr.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
-            output[1,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))            
-            curr.data$year <- sample(curr.data$year)
-            t <- map.climate(curr.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
+            output[1,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))
+            s.data <- curr.data; s.data$year <- sample(s.data$year, size=nrow(s.data))
+            t <- map.climate(s.data, rasters[[i]], 1990:2015, 1955:1980, 35, binary)
             output[2,i,,] <- t(sapply(quantiles, function(x) calc.metric(t$pres.dis.pres.env, t$pres.dis.past.env, t$past.dis.pres.env, t$past.dis.past.env, x)))
         }
         return(output)
     }
-    .int.calc(data$scientificName[1], TRUE)
-    #return(mcMap(.int.calc, unique(data$scientificName), binary=binary))
+    return(mcMap(.int.calc, unique(data$scientificName), binary=binary))
 }
 
 do.work <- function(i){

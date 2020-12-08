@@ -4,11 +4,10 @@ source("src/headers.R")
 # Wrapper functions
 .combined.plot <- function(quantile, dims=1:2, clean=5, abs=FALSE){
 
-    index <- na.omit(.simplify.group("bootstrap.index", quantile, clean=clean,  abs=abs)[,1:9])
-    present <- na.omit(.simplify.group("present", quantile, abs=abs)[,1:9])
-    past <- na.omit(.simplify.group("past", quantile, abs=abs)[,1:9])
+    index <- na.omit(.simplify.group("b.track.index", quantile, clean=clean,  abs=abs)[,1:9])
+    present <- na.omit(.simplify.group("pres.dis.pres.env", quantile, abs=abs)[,1:9])
+    past <- na.omit(.simplify.group("past.dis.past.env", quantile, abs=abs)[,1:9])
     
-    #layout(matrix(1:6, nrow=2, byrow=TRUE), widths=c(5,5,5), heights=c(5,1))
     par(mar=c(3.1,3.1,1.1,1.1), mfrow=c(1,3))
     present <- prcomp(present, scale=TRUE)
     past <- prcomp(past, scale=TRUE)
@@ -22,7 +21,7 @@ source("src/headers.R")
     var <- pca$sdev^2
     p.var <- (var / sum(var)) * 100
     par(mar=c(4.5, 4.5, 1.1, 1.1))
-    plot(density, display="filled.contour", cont=seq(10,90,10), xlab=paste0("PC1 (% variance = ",round(p.var[1]),")"), ylab=paste0("PC2 (% variance = ",round(p.var[2]),")"), cex.lab=1.5, cex.axis=1.25)
+    plot(density, display="filled.contour", cont=seq(10,90,10), xlab=paste0("PC1 (% variance = ",round(p.var[1]),")"), ylab=paste0("PC2 (% variance = ",round(p.var[2]),")"), cex.lab=1.5, cex.axis=1.25, main="")
     points(pca$x, pch=20, cex=.5, col=alpha("grey60",.25))
     arrows(rep(0,ncol(pca$x)),rep(0,ncol(pca$x)), pca$rotation[,dims[1]]*scale, pca$rotation[,dims[2]]*scale, length=.1, lwd=3)
     text.locs <- pca$rotation*scale*1.3
@@ -30,21 +29,24 @@ source("src/headers.R")
 }
 
 # Load data
-plants <- readRDS("clean-data/plants-index.RDS")
-fungi <- readRDS("clean-data/fungi-index.RDS")
-insects <- readRDS("clean-data/insects-index.RDS")
-mammals <- readRDS("clean-data/mammals-index.RDS")
-reptiles <- readRDS("clean-data/reptiles-index.RDS")
-birds <- readRDS("clean-data/birds-index.RDS")
-amphibians <- readRDS("clean-data/amphibians-index.RDS")
+plants <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100-TRUEplants-index.RDS"))
+fungi <- readRDS("clean-data/rawbin-clnspc-100-TRUEfungi-index.RDS")
+insects <- readRDS("clean-data/rawbin-clnspc-100-TRUEinsects-index.RDS")
+mammals <- readRDS("clean-data/rawbin-clnspc-100-TRUEmammals-index.RDS")
+reptiles <- readRDS("clean-data/rawbin-clnspc-100-TRUEreptiles-index.RDS")
+#birds <- readRDS("clean-data/birds-index.RDS")
+amphibians <- readRDS("clean-data/rawbin-clnspc-100-TRUEamphibians-index.RDS")
+combined <- unlist(list(plants, fungi, insects, mammals, amphibians, reptiles), recursive=FALSE)
+combined <- combined[sapply(combined, class) == "array"]
+
 
 # PCAs
 for(quant in c("0.05","0.25","0.5","0.75","0.95")){
-    past <- prcomp(na.omit(.simplify.group("past", quant)[,1:9]), scale=TRUE)
+    past <- prcomp(na.omit(.simplify.group("past.dis.past.env", quant)[,1:9]), scale=TRUE)
     pdf(paste0("figures/pca-",gsub("0.","0",quant,fixed=TRUE),"-past.pdf")); .pca.plot(past); dev.off()
-    present <- prcomp(na.omit(.simplify.group("present", quant)[,1:9]), scale=TRUE)
+    present <- prcomp(na.omit(.simplify.group("pres.dis.pres.env", quant)[,1:9]), scale=TRUE)
     pdf(paste0("figures/pca-",gsub("0.","0",quant,fixed=TRUE),"-present.pdf")); .pca.plot(present); dev.off()
-    index <- prcomp(na.omit(.simplify.group("bootstrap.index", quant, clean=10)[,1:9]), scale=TRUE)
+    index <- prcomp(na.omit(.simplify.group("b.track.index", quant, clean=10)[,1:9]), scale=TRUE)
     pdf(paste0("figures/pca-",gsub("0.","0",quant,fixed=TRUE),"-index.pdf")); .pca.plot(index); dev.off()
 }
 

@@ -122,29 +122,6 @@ prog.bar <- function(x, y){
     data <- data[year > 1955 & year <= 2015,]
     return(data)
 }
-.calc.metric <- function(present, past, projected, quantile=.5, n.boot=999){
-    # Calculate observed quantiles
-    m.present <- quantile(present, quantile, na.rm=TRUE)
-    m.past <- quantile(past, quantile, na.rm=TRUE)
-    m.projected <- quantile(projected, quantile, na.rm=TRUE)
-    index <- (m.present-m.past) / (m.projected-m.past)
-
-    # Bootstrap past and present sampling
-    b.present <- replicate(n.boot, sample(present, length(past), replace=TRUE), simplify=FALSE)
-    b.present <- sapply(b.present, quantile, probs=quantile, na.rm=TRUE)
-    b.past <- replicate(n.boot, sample(past, length(present), replace=TRUE), simplify=FALSE)
-    b.past <- sapply(b.past, quantile, probs=quantile, na.rm=TRUE)
-    b.projected <- replicate(n.boot, sample(projected, length(present), replace=TRUE), simplify=FALSE)
-    b.projected <- sapply(b.projected, quantile, probs=quantile, na.rm=TRUE)
-    b.mad <- mad((b.present-b.past) / (b.projected-b.past))
-    b.index <- median((b.present-b.past) / (b.projected-b.past))
-    
-    # Format and return
-    return(setNames(
-        c(index, b.index, b.mad, quantile,m.present,m.past,m.projected),
-        c("index","bootstrap.index", "mad.index", "quantile","present","past","projected")
-    ))
-}
 .assign.outcome <- function(present, past, projected){
     if(present==past)
         return("track")
@@ -176,8 +153,8 @@ prog.bar <- function(x, y){
     }
     return("ERROR")
 }
-.simplify <- function(data, index, quantile, clean=NA, abs=FALSE){
-    data <- t(data[,quantile,index,])
+.simplify <- function(data, index, quantile, null, clean=NA, abs=FALSE){
+    data <- t(sapply(data, function(x) x[null,,quantile,index]))
     if(!is.na(clean)){
         keep <- rep(TRUE, nrow(data))
         for(i in seq_len(ncol(data)))
@@ -188,15 +165,15 @@ prog.bar <- function(x, y){
         data <- abs(data)
     return(data)
 }
-.simplify.group <- function(index, quantile, clean=NA, abs=FALSE)
+.simplify.group <- function(index, quantile, null="observed", clean=NA, abs=FALSE)
     return(rbind(
-        data.frame(.simplify(plants, index, quantile, clean, abs), taxon="plants"),
-        data.frame(.simplify(fungi, index, quantile, clean, abs), taxon="fungi"),
-        data.frame(.simplify(insects, index, quantile, clean, abs), taxon="insects"),
-        data.frame(.simplify(mammals, index, quantile, clean, abs), taxon="mammals"),
-        data.frame(.simplify(reptiles, index, quantile, clean, abs), taxon="reptiles"),
-        data.frame(.simplify(amphibians, index, quantile, clean, abs), taxon="amphibians"),
-        data.frame(.simplify(birds, index, quantile, clean, abs), taxon="birds")
+        data.frame(.simplify(plants, index, quantile, null, clean, abs), taxon="plants"),
+        data.frame(.simplify(fungi, index, quantile, null, clean, abs), taxon="fungi"),
+        data.frame(.simplify(insects, index, quantile, null, clean, abs), taxon="insects"),
+        data.frame(.simplify(mammals, index, quantile, null, clean, abs), taxon="mammals"),
+        data.frame(.simplify(reptiles, index, quantile, null, clean, abs), taxon="reptiles"),
+        data.frame(.simplify(amphibians, index, quantile, null, clean, abs), taxon="amphibians"),
+        data.frame(.simplify(birds, index, quantile, null, clean, abs), taxon="birds")
     ))
 .simplify.quantile <- function(index, var, clean=NA, abs=FALSE)
     return(rbind(
