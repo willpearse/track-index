@@ -1,5 +1,6 @@
 # Headers
 source("src/headers.R")
+stem <- "clnbin-clnspc-100-TRUE"
 
 # Wrapper functions
 .univariate <- function(data, explanatory){
@@ -11,9 +12,11 @@ source("src/headers.R")
     colnames(output) <- names(data); rownames(output) <- c("r","p")
     return(output)
 }
-.combine.data <- function(index, quant, clean=10, abs=FALSE){
-    data <- .simplify.group(index, quant, clean, abs)
+.combine.data <- function(stem, index, quant, null, clean=10, abs=FALSE){
+    c(data,metadata) %<-% .load.indices(stem)
+    data <- as.data.frame(.simplify(data, index, quant, null, clean, abs))
     data$species <- rownames(data)
+    data$taxon <- metadata$taxon[match(data$species, metadata$species)]
     
     data$bm.mamm <- neotoma$log.mass[match(data$species, neotoma$binomial)]
     data$bm.mamm[data$taxon != "mammals"] <- NA
@@ -26,9 +29,8 @@ source("src/headers.R")
     data$log.Amass <- glopnet$log.Amass[match(data$species, glopnet$Species)]
     return(data)    
 }
-.corr.mat <- function(index, quant, clean, abs=FALSE, p.val=FALSE){
-    data <- .combine.data(index, quant, clean, abs)
-
+.corr.mat <- function(stem, index, quant, null, clean, abs=FALSE, p.val=FALSE){
+    data <- .combine.data(stem, index, quant, null, clean, abs)
     c.var <- setNames(
         c("clouds","frost","evapo-trans.","precipitation","min(temp)","mean(temp)","max(temp)","vapour","rainy day"),
         c("cld","frs","pet","pre","tmn","tmp","tmx","vap","wet")
@@ -54,13 +56,13 @@ source("src/headers.R")
     }
     return(mat)
 }
-.plot.corr.mat <- function(index, comparison, quant, clean, abs=FALSE){
-    index.mat <- t(.corr.mat(index, quant, clean, abs))
-    index.mat.p <- t(.corr.mat(index, quant, clean, abs, p.val=TRUE))
+.plot.corr.mat <- function(stem, index, comparison, quant, null, clean, abs=FALSE){
+    index.mat <- t(.corr.mat(stem, index, quant, null, clean, abs))
+    index.mat.p <- t(.corr.mat(stem, index, quant, null, clean, abs, p.val=TRUE))
     signif <- index.mat.p < .05
     index.mat.p <- matrix(0, nrow=nrow(index.mat), ncol=ncol(index.mat))
     index.mat.p[signif] <- 1
-    comparison.mat <- t(.corr.mat(comparison, quant, clean=NA))
+    comparison.mat <- t(.corr.mat(stem, comparison, quant, null, clean=NA))
     cols <- colorRampPalette(c("red", "white", "blue"))
                    
     comparison.cuts <- as.numeric(cut(as.numeric(comparison.mat), breaks=seq(-1,1,length.out=201)))
@@ -78,16 +80,6 @@ source("src/headers.R")
     text(-.5, 9.4, "present")
     text(-.5, 9, "track\nindex")
 }
-
-# Load tracking data
-plants <- readRDS("clean-data/plants-index.RDS")
-fungi <- readRDS("clean-data/fungi-index.RDS")
-insects <- readRDS("clean-data/insects-index.RDS")
-mammals <- readRDS("clean-data/mammals-index.RDS")
-reptiles <- readRDS("clean-data/reptiles-index.RDS")
-birds <- readRDS("clean-data/birds-index.RDS")
-amphibians <- readRDS("clean-data/amphibians-index.RDS")
-combined <- .simplify.group("bootstrap.index", "0.5", clean=10)
 
 # Load Neotoma data
 neotoma <- read.csv("raw-data/Amniote_Database_Aug_2015.csv", as.is=TRUE)
@@ -109,36 +101,91 @@ elton.bm <- setNames(c(elton.mam$BodyMass.Value, elton.birds$BodyMass.Value), c(
 elton.bm <- log10(elton.bm)
 
 # Combine
-pdf("figures/traits-05.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.05", clean=5); dev.off()
-pdf("figures/traits-25.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.25", 5); dev.off()
-pdf("figures/traits-50.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.5", 5); dev.off()
-pdf("figures/traits-75.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.75", 5); dev.off()
-pdf("figures/traits-95.pdf"); .plot.corr.mat("bootstrap.index", "present", "0.95", 5); dev.off()
+pdf("figures/traits-05.pdf"); .plot.corr.mat(stem, "b.track.index", "pres.dis.pres.env", "0.05", "observed", clean=5); dev.off()
+pdf("figures/traits-25.pdf"); .plot.corr.mat(stem, "b.track.index", "pres.dis.pres.env", "0.25", "observed", 5); dev.off()
+pdf("figures/traits-50.pdf"); .plot.corr.mat(stem, "b.track.index", "pres.dis.pres.env", "0.5", "observed", 5); dev.off()
+pdf("figures/traits-75.pdf"); .plot.corr.mat(stem, "b.track.index", "pres.dis.pres.env", "0.75", "observed", 5); dev.off()
+pdf("figures/traits-95.pdf"); .plot.corr.mat(stem, "b.track.index", "pres.dis.pres.env", "0.95", "observed", 5); dev.off()
 
 # Correlations
+.get.vals <- function(stem, index, null, clean, p)
+    return(
+        abind(
+            .corr.mat(stem, index, "0.05", null, clean, p),
+            .corr.mat(stem, index, "0.25", null, clean, p),
+            .corr.mat(stem, index, "0.5", null, clean, p),
+            .corr.mat(stem, index, "0.75", null, clean, p),
+            .corr.mat(stem, index, "0.95", null, clean, p),
+            along=3
+        )
+    )
+index.r <- .get.vals(stem, "b.track.index", "observed", 100, FALSE)
+index.p <- .get.vals(stem, "b.track.index", "observed", 100, TRUE)
+past.r <- .get.vals(stem, "past.dis.past.env", "observed", 100, FALSE)
+past.p <- .get.vals(stem, "past.dis.past.env", "observed", 100, TRUE)
+pres.r <- .get.vals(stem, "pres.dis.pres.env", "observed", 100, FALSE)
+pres.p <- .get.vals(stem, "pres.dis.pres.env", "observed", 100, TRUE)
+sum(index.p < .05); prod(dim(index.p))
+sum(past.p < .05); prod(dim(index.p))
+sum(pres.p < .05); prod(dim(index.p))
 
-index.p <- c(
-    .corr.mat("bootstrap.index", "0.05", clean=100, p.val=TRUE),
-    .corr.mat("bootstrap.index", "0.25", clean=100, p.val=TRUE),
-    .corr.mat("bootstrap.index", "0.5", clean=100, p.val=TRUE),
-    .corr.mat("bootstrap.index", "0.75", clean=100, p.val=TRUE),
-    .corr.mat("bootstrap.index", "0.95", clean=100, p.val=TRUE)
-)
-sum(index.p < .05); length(index.p)
 
-pres.p <- c(
-    .corr.mat("present", "0.05", clean=NA, p.val=TRUE),
-    .corr.mat("present", "0.25", clean=NA, p.val=TRUE),
-    .corr.mat("present", "0.5", clean=NA, p.val=TRUE),
-    .corr.mat("present", "0.75", clean=NA, p.val=TRUE),
-    .corr.mat("present", "0.95", clean=NA, p.val=TRUE)
+
+plot(as.numeric(index.r) ~ as.numeric(past.r), asp=1, xlab="", ylab="")
+abline(0, 1, col="grey40", lty=2, lwd=3)
+
+
+# Making the combined traits and phylogeny plot
+# Get data
+traits <- data.frame(index=as.numeric(index.r[,,3]), past=as.numeric(past.r[,,3]), pres=as.numeric(pres.r[,,3]), trait=rep(rownames(index.r),ncol(index.r)), climate=rep(colnames(index.r),each=nrow(index.r)), taxon=rep(c("mammals","birds","plants","plants","plants","plants"),ncol(index.r)), type="traits")
+phylo <- data.frame(
+    index=c(
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/birds-signal.RDS")$bootstrap.index["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/mammals-signal.RDS")$bootstrap.index["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/plants-signal.RDS")$bootstrap.index["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/reptiles-signal.RDS")$bootstrap.index["0.5",])
+    ),
+    past=c(
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/birds-signal.RDS")$past["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/mammals-signal.RDS")$past["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/plants-signal.RDS")$past["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/reptiles-signal.RDS")$past["0.5",])
+    ),
+    pres=c(
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/birds-signal.RDS")$present["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/mammals-signal.RDS")$present["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/plants-signal.RDS")$present["0.5",]),
+        as.numeric(readRDS("../track-index-2019-r1+/clean-data/reptiles-signal.RDS")$present["0.5",])
+    ),
+    trait="phylo",
+    climate=rep(colnames(readRDS("../track-index-2019-r1+/clean-data/reptiles-signal.RDS")$bootstrap.index), 4),
+    taxon=rep(c("mammals","birds","plants","reptiles"), each=9),
+    type="phylo"
 )
-sum(pres.p < .05); length(pres.p)
-past.p <- c(
-    .corr.mat("past", "0.05", clean=NA, p.val=TRUE),
-    .corr.mat("past", "0.25", clean=NA, p.val=TRUE),
-    .corr.mat("past", "0.5", clean=NA, p.val=TRUE),
-    .corr.mat("past", "0.75", clean=NA, p.val=TRUE),
-    .corr.mat("past", "0.95", clean=NA, p.val=TRUE)
-)
-sum(past.p < .05); length(past.p)
+data <- rbind(traits, phylo)
+
+z.off <- .1
+data$index <- abs(data$index)+z.off; data$pres <- abs(data$pres)+z.off; data$past <- abs(data$past)+z.off
+data$index[data$type=="phylo"] <- -data$index[data$type=="phylo"]; data$pres[data$type=="phylo"] <- -data$pres[data$type=="phylo"]; data$past[data$type=="phylo"] <- -data$past[data$type=="phylo"]
+data$t.taxon <- as.numeric(factor(data$taxon))
+data$t.trait <- as.numeric(factor(data$trait))
+lookup <- c("clouds"="cld", "frost"="frs", "evapo-trans."="vap", "precipitation"="pre", "min(temp)"="tmn", "mean(temp)"="tmn", "max(temp)"="tmx", "vapour"="vap", "rainy day"="wet", "cld"="cld", "frs"="frs", "vap"="vap", "pre"="pre", "tmn"="tmn", "tmp"="tmp", "tmx"="tmx", "vap"="vap", "wet"="wet", "pet"="pet")
+data$climate <- lookup[data$climate]
+data$t.climate <- (as.numeric(factor(data$climate))-4.5)/(4.5*4)
+
+pdf("figures/trait-phylo.pdf")
+with(data, plot(index ~ I(t.taxon+t.climate), pch=ifelse(abs(index)>abs(past) & abs(index)>abs(pres),20,21), xlab="", ylab="", axes=FALSE, ylim=c(-1-z.off,1+z.off), col="black"))
+with(data, points(pres ~ I(t.taxon+t.climate), pch=ifelse(abs(pres)>abs(past) & abs(pres)>abs(index),20,21), col="blue"))
+with(data, points(past ~ I(t.taxon+t.climate), pch=ifelse(abs(past)>abs(index) & abs(past)>abs(pres),20,21), col="red"))
+axis(2, at=seq(z.off,1+z.off,by=.2),  labels=c(NA, seq(.2,1,by=.2)))
+axis(2, at=-seq(z.off,1+z.off,by=.2), labels=c(NA, seq(.2,1,by=.2)))
+#abline(h=0, col="grey40", lwd=5)
+mtext("trait correlations", side=2, adj=.5, at=.5, line=2, cex=1.2)
+mtext("phylogenetic signal", side=2, adj=.5, at=-.5, line=2, cex=1.2)
+legend(.8, 1.2, pch=20, col=c("black","blue","red"), legend=c("index","past","present"), cex=1.2, bty="n")
+legend(1.6, 1.2, pch=c(20,21), col="black", legend=c("strongest","weaker"), cex=1.2, bty="n")
+grid.raster(readPNG("phylopics/mammal.png"),   .20, .52, width=.06)
+grid.raster(readPNG("phylopics/bird.png"),     .42, .52, width=.06)
+grid.raster(readPNG("phylopics/plant.png"),    .65, .52, width=.06)
+grid.raster(readPNG("phylopics/reptile.png"),  .88, .50, width=.06)
+dev.off()

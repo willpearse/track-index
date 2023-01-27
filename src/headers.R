@@ -39,6 +39,8 @@ if(!require("png")){
     install.packages("png"); library(png)}
 if(!require("grid")){
     install.packages("grid"); library(grid)}
+if(!require("zeallot")){
+    install.packages("zeallot"); library(zeallot)}
 
 ####################################
 # Global settings ##################
@@ -165,23 +167,49 @@ prog.bar <- function(x, y){
         data <- abs(data)
     return(data)
 }
-.simplify.group <- function(index, quantile, null="observed", clean=NA, abs=FALSE)
+.simplify.group <- function(stem, index, quantile, null="observed", clean=NA, abs=FALSE)
     return(rbind(
-        data.frame(.simplify(plants, index, quantile, null, clean, abs), taxon="plants"),
-        data.frame(.simplify(fungi, index, quantile, null, clean, abs), taxon="fungi"),
-        data.frame(.simplify(insects, index, quantile, null, clean, abs), taxon="insects"),
-        data.frame(.simplify(mammals, index, quantile, null, clean, abs), taxon="mammals"),
-        data.frame(.simplify(reptiles, index, quantile, null, clean, abs), taxon="reptiles"),
-        data.frame(.simplify(amphibians, index, quantile, null, clean, abs), taxon="amphibians"),
-        data.frame(.simplify(birds, index, quantile, null, clean, abs), taxon="birds")
+        data.frame(.simplify(.load.taxon(stem,"plants"), index, quantile, null, clean, abs), taxon="plants"),
+        data.frame(.simplify(.load.taxon(stem,"fungi"), index, quantile, null, clean, abs), taxon="fungi"),
+        data.frame(.simplify(.load.taxon(stem,"insects"), index, quantile, null, clean, abs), taxon="insects"),
+        data.frame(.simplify(.load.taxon(stem,"mammals"), index, quantile, null, clean, abs), taxon="mammals"),
+        data.frame(.simplify(.load.taxon(stem,"birds"), index, quantile, null, clean, abs), taxon="birds"),
+        data.frame(.simplify(.load.taxon(stem,"reptiles"), index, quantile, null, clean, abs), taxon="reptiles"),
+        data.frame(.simplify(.load.taxon(stem,"amphibians"), index, quantile, null, clean, abs), taxon="amphibians")
     ))
-.simplify.quantile <- function(index, var, clean=NA, abs=FALSE)
+.simplify.quantile <- function(stem, index, var, clean=NA, abs=FALSE)
     return(rbind(
-        data.frame(.simplify(plants, index, quantile, clean, abs), taxon="plants"),
-        data.frame(.simplify(fungi, index, quantile, clean, abs), taxon="fungi"),
-        data.frame(.simplify(insects, index, quantile, clean, abs), taxon="insects"),
-        data.frame(.simplify(mammals, index, quantile, clean, abs), taxon="mammals"),
-        data.frame(.simplify(reptiles, index, quantile, clean, abs), taxon="reptiles"),
-        data.frame(.simplify(amphibians, index, quantile, clean, abs), taxon="amphibians"),
-        data.frame(.simplify(birds, index, quantile, clean, abs), taxon="birds")
+        data.frame(.simplify(.load.taxon(stem,"plants"), index, quantile, clean, abs), taxon="plants"),
+        data.frame(.simplify(.load.taxon(stem,"fungi"), index, quantile, clean, abs), taxon="fungi"),
+        data.frame(.simplify(.load.taxon(stem,"insects"), index, quantile, clean, abs), taxon="insects"),
+        data.frame(.simplify(.load.taxon(stem,"mammals"), index, quantile, clean, abs), taxon="mammals"),
+        data.frame(.simplify(.load.taxon(stem,"birds"), index, quantile, clean, abs), taxon="birds"),
+        data.frame(.simplify(.load.taxon(stem,"reptiles"), index, quantile, clean, abs), taxon="reptiles"),
+        data.frame(.simplify(.load.taxon(stem,"amphibians"), index, quantile, clean, abs), taxon="amphibians")
     ))
+
+.load.taxon <- function(stem, x){
+    output <- readRDS(paste0("clean-data/",stem,x,"-index.RDS"))
+    output <- Filter(Negate(is.character), output)
+    #output <- Filter(function(y) all(is.na(y)), output)
+    return(output)
+}
+.load.indices <- function(stem="rawbin-clnspc-1000-TRUE"){
+    plants <- .load.taxon(stem, "plants")
+    fungi <- .load.taxon(stem, "fungi")
+    insects <- .load.taxon(stem, "insects")
+    mammals <- .load.taxon(stem, "mammals")
+    reptiles <- .load.taxon(stem, "reptiles")
+    birds <- .load.taxon(stem, "birds")
+    amphibians <- .load.taxon(stem, "amphibians")
+    combined <- unlist(list(plants, fungi, insects, mammals, birds, amphibians, reptiles), recursive=FALSE)
+    array <- combined[sapply(combined, class) == "array"]
+    metadata <- data.frame(
+        species=names(array),
+        taxon=rep(
+            c("plants", "fungi", "insects", "mammals", "birds", "amphibians", "reptiles"),
+            sapply(list(plants,fungi,insects,mammals,birds,amphibians,reptiles), length)
+        )
+    )
+    return(list(index=array, metadata=metadata))
+}

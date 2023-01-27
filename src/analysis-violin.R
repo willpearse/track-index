@@ -1,30 +1,25 @@
 # Headers
 source("src/headers.R")
-
-# Load empirical data
-plants <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100-TRUEplants-index.RDS"))
-fungi <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100-TRUEfungi-index.RDS"))
-insects <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100-TRUEinsects-index.RDS"))
-mammals <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100-TRUEmammals-index.RDS"))
-reptiles <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100-TRUEreptiles-index.RDS"))
-#birds <- readRDS("clean-data/birds-index.RDS")
-birds <- fungi
-amphibians <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100-TRUEamphibians-index.RDS"))
+stem <- "clnbin-clnspc-100-TRUE"
 
 # Do the plots
-.outline.plot <- function(climate, quant, clean=NA, se.thresh=5, abs=FALSE, index="b.track.index", sims=FALSE){
+.outline.plot <- function(stem, climate, quant, clean=NA, se.thresh=5, abs=FALSE, index="b.track.index", sims=FALSE){
     # Load and match data
-    sim.index <- .simplify.group(index, quantile=quant, null="spp.year.shuffle", clean=clean, abs=abs)
-    index <- .simplify.group(index, quantile=quant, null="observed", clean=clean, abs=abs)
+    c(data,metadata) %<-% .load.indices(stem)
+    sim.index <- as.data.frame(.simplify(data, index, quant, "spp.year.shuffle", clean, abs))
+    sim.index$taxon <- metadata$taxon[match(rownames(sim.index), metadata$species)]
+    index <- as.data.frame(.simplify(data, index, quant, "observed", clean, abs))
+    index$taxon <- metadata$taxon[match(rownames(index), metadata$species)]
     data <- data.frame(index=index[,climate], taxon=index$taxon)
     sim.data <- data.frame(index=sim.index[,climate], taxon=sim.index$taxon)
+    
     # Prepare colours and order for plotting
-    cols <- setNames(c("forestgreen","forestgreen","red", "red", "red", "red","red"), c("plants", "fungi", "insects", "mammals", "reptiles", "amphibians", "birds"))
+    cols <- setNames(c("forestgreen","forestgreen","red", "red", "red", "red","red"), c("plants", "fungi", "insects", "mammals", "birds", "amphibians", "reptiles"))
     data$taxon <- factor(data$taxon, levels=unique(as.character(data$taxon)))
     data$j.taxon <- as.numeric(factor(data$taxon))
     sim.data$taxon <- factor(sim.data$taxon, levels=unique(as.character(sim.data$taxon)))
     sim.data$j.taxon <- as.numeric(factor(sim.data$taxon))
-
+    
     # Check for order of names as otherwise plots will be wrong
     if(!identical(names(cols), as.character(unique(data$taxon))))
         stop("Names of taxa in wrong order; plots will be wrong!")
@@ -81,17 +76,17 @@ amphibians <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100
         grid.raster(readPNG("phylopics/fungus.png"),    .18, .12, width=.04, just="bottom")
         grid.raster(readPNG("phylopics/insect.png"),    .27, .12, width=.02, just="bottom")
         grid.raster(readPNG("phylopics/mammal.png"),    .36, .12, width=.04, just="bottom")
-        grid.raster(readPNG("phylopics/reptile.png"),   .45, .12, width=.04, just="bottom")
+        grid.raster(readPNG("phylopics/bird.png"),   .45, .12, width=.04, just="bottom")
         grid.raster(readPNG("phylopics/amphibian.png"), .54, .12, width=.04, just="bottom")
-        grid.raster(readPNG("phylopics/bird.png"),      .64, .12, width=.04, just="bottom")
+        grid.raster(readPNG("phylopics/reptile.png"),      .64, .12, width=.04, just="bottom")
     } else {
         grid.raster(readPNG("phylopics/plant.png"),     .095, .12, width=.04, just="bottom")
         grid.raster(readPNG("phylopics/fungus.png"),    .225, .12, width=.04, just="bottom")
         grid.raster(readPNG("phylopics/insect.png"),    .36, .12, width=.02, just="bottom")
         grid.raster(readPNG("phylopics/mammal.png"),    .49, .12, width=.04, just="bottom")
-        grid.raster(readPNG("phylopics/reptile.png"),   .62, .12, width=.04, just="bottom")
+        grid.raster(readPNG("phylopics/bird.png"),   .62, .12, width=.04, just="bottom")
         grid.raster(readPNG("phylopics/amphibian.png"), .76, .12, width=.04, just="bottom")
-        grid.raster(readPNG("phylopics/bird.png"),      .89, .12, width=.04, just="bottom")
+        grid.raster(readPNG("phylopics/reptile.png"),      .89, .12, width=.04, just="bottom")
     }
     
 }
@@ -99,7 +94,7 @@ amphibians <- Filter(Negate(is.character), readRDS("clean-data/rawbin-clnspc-100
 for(climate in c("cld","frs","pet","pre","tmn","tmp","tmx","vap","wet")){
     for(quant in c("0.05","0.25","0.5","0.75","0.95")){
         pdf(paste0("figures/violin-",climate,"-",gsub(".","-",quant,fixed=TRUE),".pdf"), width=17, height=10)
-        .outline.plot(climate, quant, clean=5, index="b.track.index")
+        .outline.plot(stem, climate, quant, clean=5, index="b.track.index")
         dev.off()
     }
 }        
@@ -107,8 +102,9 @@ pdf(paste0("figures/violin-tmp-0-5.pdf"), width=17, height=10);.outline.plot("tm
 
 
 # Calculate the numbers
-.percentage.stats <- function(index, var, clean, abs=FALSE, overshoot=FALSE, process=TRUE){
-    index <- .simplify.group(index, var, clean, abs)
+.percentage.stats <- function(stem, index, var, clean, abs=FALSE, overshoot=FALSE, process=TRUE){
+    browser()
+    index <- .simplify.group(stem, index, null="observed", clean, abs)[,var]
     
     if(overshoot){
         index <- index > 1
@@ -125,48 +121,48 @@ pdf(paste0("figures/violin-tmp-0-5.pdf"), width=17, height=10);.outline.plot("tm
             c("something","at.least.two","at.least.three","everything")))
     } else return(index)
 }
-.percentage.stats("bootstrap.index", "cld", clean=100)
-.percentage.stats("bootstrap.index", "frs", clean=100)
-.percentage.stats("bootstrap.index", "pet", clean=100)
-.percentage.stats("bootstrap.index", "pre", clean=100)
-.percentage.stats("bootstrap.index", "tmn", clean=100)
-.percentage.stats("bootstrap.index", "tmp", clean=100)
-.percentage.stats("bootstrap.index", "tmx", clean=100)
-.percentage.stats("bootstrap.index", "vap", clean=100)
-.percentage.stats("bootstrap.index", "wet", clean=100)
+.percentage.stats(stem, "b.track.index", "cld", clean=100)
+.percentage.stats(stem, "b.track.index", "frs", clean=100)
+.percentage.stats(stem, "b.track.index", "pet", clean=100)
+.percentage.stats(stem, "b.track.index", "pre", clean=100)
+.percentage.stats(stem, "b.track.index", "tmn", clean=100)
+.percentage.stats(stem, "b.track.index", "tmp", clean=100)
+.percentage.stats(stem, "b.track.index", "tmx", clean=100)
+.percentage.stats(stem, "b.track.index", "vap", clean=100)
+.percentage.stats(stem, "b.track.index", "wet", clean=100)
 
-combined <- .percentage.stats("bootstrap.index", "wet", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "frs", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "pet", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "pre", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "tmn", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "tmp", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "tmx", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "vap", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "wet", process=FALSE, clean=100)
+combined <- .percentage.stats(stem, "b.track.index", "wet", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "frs", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "pet", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "pre", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "tmn", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "tmp", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "tmx", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "vap", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "wet", process=FALSE, clean=100)
 combined <- rowSums(combined)
 combined <- table(combined) / length(combined)
 1 - combined["0"]
 
-.percentage.stats("bootstrap.index", "cld", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "frs", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "pet", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "pre", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "tmn", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "tmp", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "tmx", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "vap", overshoot=TRUE, clean=100)
-.percentage.stats("bootstrap.index", "wet", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "cld", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "frs", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "pet", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "pre", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "tmn", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "tmp", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "tmx", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "vap", overshoot=TRUE, clean=100)
+.percentage.stats(stem, "b.track.index", "wet", overshoot=TRUE, clean=100)
 
-o.combined <- .percentage.stats("bootstrap.index", "wet", process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "frs", overshoot=TRUE, process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "pet", overshoot=TRUE, process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "pre", overshoot=TRUE, process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "tmn", overshoot=TRUE, process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "tmp", overshoot=TRUE, process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "tmx", overshoot=TRUE, process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "vap", overshoot=TRUE, process=FALSE, clean=100) |
-    .percentage.stats("bootstrap.index", "wet", overshoot=TRUE, process=FALSE, clean=100)
+o.combined <- .percentage.stats(stem, "b.track.index", "wet", process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "frs", overshoot=TRUE, process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "pet", overshoot=TRUE, process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "pre", overshoot=TRUE, process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "tmn", overshoot=TRUE, process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "tmp", overshoot=TRUE, process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "tmx", overshoot=TRUE, process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "vap", overshoot=TRUE, process=FALSE, clean=100) |
+    .percentage.stats(stem, "b.track.index", "wet", overshoot=TRUE, process=FALSE, clean=100)
 o.combined <- rowSums(o.combined)
 o.combined <- table(o.combined) / length(o.combined)
 1 - o.combined["0"]

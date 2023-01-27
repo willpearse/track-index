@@ -1,0 +1,19 @@
+To assess whether changes in sampling intensity were driving bias in our models, we used a sampling reshuffle. For each species, once, we shuffled the year in which all observations were made. This keeps species' _locations_ constant, while shuffling the year of observation. We would expect that this would make the projected climate of species' equal to the present climate, since we have removed any propensity of species to either track or not. We also expect that this would make the difference between present and past climate equal to the average of climate change experienced by the species, since location of observation is randomised across the two time periods. Thus our expectation for the tracking index value is 1.
+
+
+
+
+
+
+
+
+
+
+We performed two kinds of null randomisation to improve confidence in our approach: (1) rarefaction and (2) permutation. (1) We downsampled each of our present/past distributions to match the sampling of the least-sampled time-period, so that random increases/decreases in sampling would be accounted for. (2) To assess whether systematic changes in sampling through time affect our estimates, and also to get a confidence interval on departure from stationarity of tracking, we constructed a null model for stationarity. For each species, 99 times, we shuffled the year in which all observations were made. We then ranked our observed track index within this null to generate a distribution. This keeps species' _locations_ constant, while shuffling the year of observation. If species were not moving in space, we would expect the year in which they were sampled to be essentially random. Thus significant degrees of tracking of overshooting (whichever the fucking direction is) would be detected by this null.
+
+
+
+
+
+Montpelier:
+To get confidence intervals on departure from stationarity of tracking AND STATIONARITY, we constructed a null model for stationarity using the main-text formulation and the supplementary. This allows us to generate distributions for both null models, and allows us to distinguish when we are certain it is not one, certain not both, and uncertain about either. For each species, 99 times, we shuffled the year in which all observations were made. We then ranked our observed track index within this null to generate a distribution. This keeps species' _locations_ constant, while shuffling the year of observation. If species were not moving in space, we would expect the year in which they were sampled to be essentially random. Thus significant degrees of tracking of overshooting (whichever the fucking direction is) would be detected by this null. SOMETHING SOMETHING CONTROLS FOR TEMPORAL BIAS BY MIXING.
